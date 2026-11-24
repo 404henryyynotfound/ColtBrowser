@@ -1,39 +1,45 @@
 # ColtBrowser
 
-A sleek, privacy-focused web browser simulator powered by DuckDuckGo, **built for Muir Middle School**. Designed as a lightweight single-page web application with multi-tab browsing, per-tab history, persistent bookmarks, and dark/light theme support.
-
-**For HVS Students:** Access directly at [sites.google.com/hvs.org/coltbrowser](https://sites.google.com/hvs.org/coltbrowser)  
-*(Not on HVS? You can download and run it locally using the steps below.)*
+A sleek, privacy-focused web browser simulator powered by DuckDuckGo, **built for Muir Middle School (HVS)**. Available in two editions: **ColtBrowser v1.1.0 BETA** (full customization & study tools) and the new **ColtBrowser LITE** (ultra-fast, low-RAM edition built for school Chromebooks).
 
 ---
 
-## Features
+## Quick Access
 
-- **Built for Muir Middle School:** Clean, distraction-free interface tailored for Muir students and classroom research.
-- **DuckDuckGo Privacy Search:** Queries the DuckDuckGo Instant Answer API directly from the omnibox or home page for instant definitions, abstracts, and quick search links.
-- **Multi-Tab Browsing:** Open, switch, and close multiple tabs independently, complete with per-tab Back, Forward, Refresh, and Home navigation stacks.
-- **Smart Site Viewport:** Browse embeddable websites directly inside the app with a one-click external launch banner for sites that restrict iframe embedding (`X-Frame-Options` / CSP).
-- **Bookmarks & History:** Save favorite school and study sites to a persistent bookmarks bar and browse past visits in a slide-over library drawer (stored locally in `localStorage`).
-- **Customizable Themes:** Toggle seamlessly between Dark and Light modes.
+### For HVS Students (No Download Required)
+- **ColtBrowser (Standard / v1.1.0 BETA):** [sites.google.com/hvs.org/coltbrowser](https://sites.google.com/hvs.org/coltbrowser)
+- **ColtBrowser LITE:** [sites.google.com/HVS.org/coltbrowser-lite](https://sites.google.com/HVS.org/coltbrowser-lite)
+
+*(Must be signed into your HVS Google account to access the Google Sites portals.)*
+
+### Download & Run Locally (Downloads Folder)
+1. Click the **Code** button on this repository and select **Download ZIP** (or download `coltbrowser.html` / `coltbrowser-lite.html` directly).
+2. Open your computer's **Downloads** folder and extract the ZIP file if needed.
+3. Double-click `coltbrowser.html` or `coltbrowser-lite.html` to launch it directly in any modern web browser—no installation required.
 
 ---
 
-## Getting Started
+## Editions Overview
 
-### HVS Students
-Visit [sites.google.com/hvs.org/coltbrowser](https://sites.google.com/hvs.org/coltbrowser) while signed into your HVS Google account.
+### ColtBrowser LITE (`v1.0 LITE` — New!)
+Engineered specifically for **Muir Middle School Chromebooks** and older, low-RAM devices:
+- **Zero-Lag Performance:** Uses native system fonts, zero external scripts, and zero heavy animations for instant startup.
+- **8-Tab Memory Cap:** Keeps RAM usage low (`Tabs: 1/8`) so school devices never slow down.
+- **Muir Colts Theme:** High-contrast Navy & Gold Light Mode default with a one-click Dark Mode toggle.
+- **Essential Student Home (`colt://home`):** Includes DuckDuckGo search, quick school links (HVS Portal, Khan Academy, Desmos, Wikipedia), a lightweight Quick Note box, and a 30-entry capped History/Bookmarks drawer.
 
-### Download & Run Locally
-1. Click the **Code** button on this repository and select **Download ZIP** (or clone the repo).
-2. Extract the folder and rename `coltbrowser.html` to `index.html` (if not already renamed).
-3. Double-click `index.html` to open it in any modern web browser—no installation or internet setup required.
+### ColtBrowser `v1.1.0 BETA`
+The full-featured edition with deep personalization and classroom productivity tools:
+- **Full Settings (`colt://settings`):** Choose from 5 themes (including **Muir Colts Navy & Gold** and Midnight OLED), 6 accent colors, custom fonts, density controls, and DuckDuckGo SafeSearch modes.
+- **Student Focus Suite:** Built-in 25-minute Study Timer, customizable Home Page shortcuts, and a Split-View Scratchpad.
+- **Multi-Tab & Smart Viewport:** Unlimited tabs with Tab Overview, persistent bookmarks bar, and one-click external launch for sites that restrict iframe embedding.
 
 ---
 
 ## License & Branding
 
-Copyright © 2026 [Your Name].
+Copyright © 2026 [Henry Green](https://github.com/404henryyynotfound).
 
 This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
 
-**Trademark & Branding Notice:** The Apache License 2.0 does **not** grant permission to use the **ColtBrowser** name, logos, or branding. If you fork or modify this project, please rebrand your version under a different name.
+**Trademark & Branding Notice:** The Apache License 2.0 does **not** grant permission to use the **ColtBrowser** or **ColtBrowser LITE** names, logos, or branding. If you fork or modify this project, please rebrand your version under a different name.
