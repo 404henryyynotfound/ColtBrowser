@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColtBrowser LITE (v1.0 LITE) — Built for Muir Middle School</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            muir: {
+              navy: '#0f294a',
+              navyDark: '#09192e',
+              gold: '#eab308',
+              goldHover: '#ca8a04'
+            }
+          },
+          fontFamily: {
+            sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Ultra-lightweight scrollbars & zero heavy animations */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
+
+  <!-- Top Browser Chrome (Zero shadows, zero blurs, crisp borders) -->
+  <header class="bg-muir-navy text-white border-b border-slate-300 dark:border-zinc-800 flex flex-col flex-shrink-0">
+    
+    <!-- Row 1: Minimal Tab Strip (Max 8 Tabs for Chromebook Low-RAM Efficiency) -->
+    <div class="flex items-center px-2 pt-1.5 gap-1.5 bg-muir-navyDark">
+      <!-- Brand Pill -->
+      <div class="flex items-center gap-1.5 pr-2 py-1 flex-shrink-0">
+        <span class="inline-block w-2.5 h-2.5 rounded-sm bg-muir-gold"></span>
+        <span class="text-xs font-bold tracking-tight">ColtBrowser</span>
+        <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded bg-muir-gold text-muir-navyDark">v1.0 LITE</span>
+      </div>
+
+      <!-- Tab Strip -->
+      <div id="tab-strip" class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- New Tab & RAM Cap Indicator -->
+      <div class="flex items-center gap-1.5 pb-1 flex-shrink-0">
+        <button id="btn-new-tab" title="New Tab (Max 8)" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-xs font-bold">
+          +
+        </button>
+        <span id="tab-counter" class="px-2 py-0.5 rounded bg-black/30 text-muir-gold text-[11px] font-mono font-semibold" title="8-Tab Low-RAM Cap">
+          Tabs: 1/8
+        </span>
+      </div>
+    </div>
+
+    <!-- Row 2: Compact Navigation & Omnibox Bar -->
+    <div class="bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 px-2 py-1.5 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800">
+      <!-- Back / Forward / Reload / Home -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-back" title="Back" disabled class="px-2 py-1 rounded border border-slate-200 dark:border-zinc-700 text-xs font-mono hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-35 disabled:pointer-events-none">
+          &larr;
+        </button>
+        <button id="btn-forward" title="Forward" disabled class="px-2 py-1 rounded border border-slate-200 dark:border-zinc-700 text-xs font-mono hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-35 disabled:pointer-events-none">
+          &rarr;
+        </button>
+        <button id="btn-reload" title="Reload" class="px-2 py-1 rounded border border-slate-200 dark:border-zinc-700 text-xs font-mono hover:bg-slate-100 dark:hover:bg-zinc-800">
+          &#8635;
+        </button>
+        <button id="btn-home" title="ColtBrowser LITE Home (colt://home)" class="px-2 py-1 rounded border border-slate-200 dark:border-zinc-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800">
+          Home
+        </button>
+      </div>
+
+      <!-- Unified Omnibox -->
+      <form id="omnibox-form" class="flex-1 flex items-center bg-slate-100 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-700 focus-within:border-muir-navy dark:focus-within:border-muir-gold rounded-lg px-2.5 py-1">
+        <span id="omnibox-tag" class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-muir-navy text-white mr-2 flex-shrink-0">
+          DDG
+        </span>
+        <input
+          id="omnibox-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search DuckDuckGo or enter URL (e.g. colt://home)..."
+          class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
+        />
+        <button type="button" id="btn-bookmark" title="Toggle Bookmark" class="px-1.5 text-sm text-slate-400 hover:text-muir-gold flex-shrink-0">
+          &#9734;
+        </button>
+        <button type="submit" class="ml-1 px-2.5 py-0.5 rounded bg-muir-navy hover:bg-muir-navyDark text-white text-xs font-semibold flex-shrink-0">
+          Go
+        </button>
+      </form>
+
+      <!-- Theme Toggle & Library Drawer Toggle -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-theme" title="Toggle Light / Dark Mode" class="px-2.5 py-1 rounded border border-slate-200 dark:border-zinc-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800">
+          Dark
+        </button>
+        <button id="btn-drawer" title="Bookmarks & History" class="px-2.5 py-1 rounded bg-muir-gold hover:bg-muir-goldHover text-muir-navyDark text-xs font-bold">
+          Library
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 3: Slim Bookmarks Bar -->
+    <div id="bookmarks-bar" class="bg-slate-100 dark:bg-zinc-900/90 text-slate-800 dark:text-zinc-200 px-2.5 py-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+      <!-- Populated dynamically -->
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 relative overflow-hidden flex">
+    
+    <!-- Primary Viewport -->
+    <div id="viewport" class="flex-1 h-full w-full overflow-y-auto bg-slate-50 dark:bg-zinc-950">
+      <!-- Views: colt://home, colt://search?q=..., or Web Iframe -->
+    </div>
+
+    <!-- Lightweight Slide-Over Drawer (Bookmarks & History) -->
+    <aside id="library-drawer" class="hidden w-80 sm:w-96 bg-white dark:bg-zinc-900 border-l border-slate-300 dark:border-zinc-800 h-full flex-col flex-shrink-0 z-20">
+      <div class="px-3 py-2.5 bg-muir-navy text-white flex items-center justify-between">
+        <span class="text-xs font-bold tracking-wide uppercase">Bookmarks &amp; History</span>
+        <button id="btn-close-drawer" class="px-2 py-0.5 rounded bg-white/15 hover:bg-white/25 text-xs font-bold">
+          &times;
+        </button>
+      </div>
+
+      <!-- Drawer Filter Tabs -->
+      <div class="grid grid-cols-2 border-b border-slate-200 dark:border-zinc-800 text-xs font-bold">
+        <button id="tab-drawer-bm" class="py-2 bg-slate-100 dark:bg-zinc-800 text-muir-navy dark:text-muir-gold border-b-2 border-muir-navy dark:border-muir-gold">
+          Bookmarks
+        </button>
+        <button id="tab-drawer-hist" class="py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50">
+          History (Max 30)
+        </button>
+      </div>
+
+      <!-- Drawer Items List -->
+      <div id="drawer-list" class="flex-1 overflow-y-auto p-2.5 space-y-1.5 text-xs">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-2.5 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
+        <span id="drawer-status">0 items</span>
+        <button id="btn-clear-data" class="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-700 text-white font-semibold">
+          Clear Data
+        </button>
+      </div>
+    </aside>
+
+    <!-- Minimal Status Toast (Zero blur/shadow) -->
+    <div id="lite-toast" class="hidden fixed bottom-3 right-3 px-3 py-1.5 rounded bg-muir-navy text-white border border-muir-gold text-xs font-semibold z-30">
+      Saved
+    </div>
+  </main>
+
+  <script>
+    /**
+     * ColtBrowser LITE (v1.0 LITE)
+     * Built for Muir Middle School (HVS) Chromebooks & low-RAM hardware.
+     * Storage namespace: coltbrowser_lite_
+     */
+    (function () {
+      const PREFIX = 'coltbrowser_lite_';
+      const MAX_TABS = 8;
+      const MAX_HISTORY = 30;
+
+      const DEFAULT_BOOKMARKS = [
+        { title: 'HVS Portal', url: 'https://www.hvs.org' },
+        { title: 'DuckDuckGo', url: 'https://duckduckgo.com' },
+        { title: 'Wikipedia', url: 'https://en.wikipedia.org' },
+        { title: 'Khan Academy', url: 'https://www.khanacademy.org' },
+        { title: 'Desmos', url: 'https://www.desmos.com/calculator' }
+      ];
+
+      // Application State
+      const state = {
+        tabs: [],
+        activeTabId: null,
+        bookmarks: [],
+        history: [],
+        note: '',
+        darkMode: false,
+        drawerOpen: false,
+        drawerTab: 'bookmarks', // 'bookmarks' | 'history'
+        dismissedBannerUrls: {}
+      };
+
+      // --- LocalStorage Helpers ---
+      function save(key, val) {
+        try {
+          localStorage.setItem(PREFIX + key, JSON.stringify(val));
+        } catch (e) {}
+      }
+
+      function load(key, fallback) {
+        try {
+          const raw = localStorage.getItem(PREFIX + key);
+          return raw !== null ? JSON.parse(raw) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function initStorage() {
+        state.bookmarks = load('bookmarks', [...DEFAULT_BOOKMARKS]);
+        state.history = load('history', []);
+        state.note = load('note', '');
+        state.darkMode = load('darkMode', false);
+        applyTheme();
+      }
+
+      // --- Theme Management ---
+      function applyTheme() {
+        const html = document.documentElement;
+        const btn = document.getElementById('btn-theme');
+        if (state.darkMode) {
+          html.classList.add('dark');
+          btn.textContent = 'Light';
+        } else {
+          html.classList.remove('dark');
+          btn.textContent = 'Dark';
+        }
+      }
+
+      function toggleTheme() {
+        state.darkMode = !state.darkMode;
+        save('darkMode', state.darkMode);
+        applyTheme();
+      }
+
+      // --- Lightweight Toast ---
+      let toastTimeout = null;
+      function notify(msg) {
+        const el = document.getElementById('lite-toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => el.classList.add('hidden'), 1800);
+      }
+
+      // --- Tab Management (8-Tab RAM Cap) ---
+      function createTab(url = 'colt://home') {
+        if (state.tabs.length >= MAX_TABS) {
+          notify('Max 8 tabs open (Low-RAM Protection)');
+          return;
+        }
+        const id = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
+        const tab = {
+          id,
+          title: 'ColtBrowser LITE',
+          stack: [],
+          index: -1
+        };
+        state.tabs.push(tab);
+        state.activeTabId = id;
+        navigateTab(id, url, true);
+      }
+
+      function closeTab(id, e) {
+        if (e) e.stopPropagation();
+        const idx = state.tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+
+        state.tabs.splice(idx, 1);
+        if (state.tabs.length === 0) {
+          createTab('colt://home');
+          return;
+        }
+        if (state.activeTabId === id) {
+          state.activeTabId = state.tabs[Math.min(idx, state.tabs.length - 1)].id;
+        }
+        render();
+      }
+
+      function switchTab(id) {
+        if (state.activeTabId === id) return;
+        state.activeTabId = id;
+        render();
+      }
+
+      function getActiveTab() {
+        return state.tabs.find(t => t.id === state.activeTabId);
+      }
+
+      // --- URL / Search Parser ---
+      function resolveInput(raw) {
+        const text = (raw || '').trim();
+        if (!text || text === 'colt://home' || text === 'colt://newtab') {
+          return { kind: 'home', url: 'colt://home' };
+        }
+        if (text.startsWith('colt://search')) {
+          const q = new URLSearchParams(text.split('?')[1] || '').get('q') || '';
+          return { kind: 'search', query: q, url: `colt://search?q=${encodeURIComponent(q)}` };
+        }
+        const hasProto = /^https?:\/\//i.test(text);
+        const looksLikeDomain = !/\s/.test(text) && (text.includes('.') || text.startsWith('localhost'));
+        if (hasProto || looksLikeDomain) {
+          const normalized = hasProto ? text : 'https://' + text;
+          return { kind: 'web', url: normalized };
+        }
+        return {
+          kind: 'search',
+          query: text,
+          url: `colt://search?q=${encodeURIComponent(text)}`
+        };
+      }
+
+      function navigateActive(raw) {
+        const tab = getActiveTab();
+        if (!tab) return;
+        navigateTab(tab.id, raw, true);
+      }
+
+      function navigateTab(tabId, raw, push) {
+        const tab = state.tabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        const target = resolveInput(raw);
+        if (push) {
+          tab.stack = tab.stack.slice(0, tab.index + 1);
+          tab.stack.push(target.url);
+          tab.index = tab.stack.length - 1;
+        }
+
+        updateTabTitle(tab, target);
+
+        if (target.url !== 'colt://home') {
+          state.history.unshift({
+            title: tab.title,
+            url: target.url,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          if (state.history.length > MAX_HISTORY) {
+            state.history.length = MAX_HISTORY;
+          }
+          save('history', state.history);
+        }
+
+        if (tab.id === state.activeTabId) {
+          render();
+        } else {
+          renderTabs();
+        }
+      }
+
+      function updateTabTitle(tab, target) {
+        if (target.kind === 'home') {
+          tab.title = 'Home — LITE';
+        } else if (target.kind === 'search') {
+          tab.title = `${target.query || 'Search'} — DDG`;
+        } else {
+          try {
+            tab.title = new URL(target.url).hostname.replace(/^www\./, '');
+          } catch (e) {
+            tab.title = target.url;
+          }
+        }
+      }
+
+      function goBack() {
+        const tab = getActiveTab();
+        if (!tab || tab.index <= 0) return;
+        tab.index--;
+        const url = tab.stack[tab.index];
+        updateTabTitle(tab, resolveInput(url));
+        render();
+      }
+
+      function goForward() {
+        const tab = getActiveTab();
+        if (!tab || tab.index >= tab.stack.length - 1) return;
+        tab.index++;
+        const url = tab.stack[tab.index];
+        updateTabTitle(tab, resolveInput(url));
+        render();
+      }
+
+      function reloadTab() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        renderViewport(tab.stack[tab.index] || 'colt://home');
+      }
+
+      // --- Render Chrome & Views ---
+      function render() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.index] || 'colt://home';
+
+        renderTabs();
+        updateToolbar(tab, currentUrl);
+        renderViewport(currentUrl);
+        if (state.drawerOpen) renderDrawer();
+      }
+
+      function renderTabs() {
+        const strip = document.getElementById('tab-strip');
+        const counter = document.getElementById('tab-counter');
+        counter.textContent = `Tabs: ${state.tabs.length}/${MAX_TABS}`;
+
+        strip.innerHTML = state.tabs.map(t => {
+          const active = t.id === state.activeTabId;
+          return `
+            <div data-tab-id="${t.id}" class="flex items-center gap-2 px-2.5 py-1 rounded-t text-xs cursor-pointer max-w-[175px] min-w-[100px] border-t border-x ${
+              active
+                ? 'bg-white dark:bg-zinc-900 text-muir-navy dark:text-muir-gold font-bold border-slate-200 dark:border-zinc-800'
+                : 'bg-white/10 text-slate-200 hover:bg-white/20 border-transparent'
+            }">
+              <span class="truncate flex-1">${esc(t.title)}</span>
+              <button data-close-id="${t.id}" title="Close Tab" class="px-1 rounded hover:bg-rose-500 hover:text-white font-bold">&times;</button>
+            </div>
+          `;
+        }).join('');
+
+        strip.querySelectorAll('[data-tab-id]').forEach(el => {
+          el.addEventListener('click', () => switchTab(el.getAttribute('data-tab-id')));
+        });
+        strip.querySelectorAll('[data-close-id]').forEach(btn => {
+          btn.addEventListener('click', (e) => closeTab(btn.getAttribute('data-close-id'), e));
+        });
+      }
+
+      function updateToolbar(tab, currentUrl) {
+        document.getElementById('btn-back').disabled = tab.index <= 0;
+        document.getElementById('btn-forward').disabled = tab.index >= tab.stack.length - 1;
+
+        const input = document.getElementById('omnibox-input');
+        const tag = document.getElementById('omnibox-tag');
+
+        if (currentUrl === 'colt://home') {
+          input.value = '';
+          tag.textContent = 'DDG';
+        } else if (currentUrl.startsWith('colt://search')) {
+          const q = new URLSearchParams(currentUrl.split('?')[1] || '').get('q') || '';
+          input.value = q;
+          tag.textContent = 'DDG';
+        } else {
+          input.value = currentUrl;
+          tag.textContent = 'WEB';
+        }
+
+        const isSaved = state.bookmarks.some(b => b.url === currentUrl);
+        const bmBtn = document.getElementById('btn-bookmark');
+        bmBtn.innerHTML = isSaved ? '&#9733;' : '&#9734;';
+        bmBtn.classList.toggle('text-muir-gold', isSaved);
+      }
+
+      function renderBookmarksBar() {
+        const bar = document.getElementById('bookmarks-bar');
+        bar.innerHTML = state.bookmarks.map(bm => `
+          <button data-bm-url="${esc(bm.url)}" class="px-2 py-0.5 rounded hover:bg-slate-200 dark:hover:bg-zinc-800 whitespace-nowrap font-medium">
+            ${esc(bm.title)}
+          </button>
+        `).join('');
+
+        bar.querySelectorAll('[data-bm-url]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-bm-url')));
+        });
+      }
+
+      // --- Viewport Views ---
+      function renderViewport(url) {
+        const vp = document.getElementById('viewport');
+        if (url === 'colt://home') {
+          renderHomeView(vp);
+        } else if (url.startsWith('colt://search')) {
+          const q = new URLSearchParams(url.split('?')[1] || '').get('q') || '';
+          renderSearchView(vp, q);
+        } else {
+          renderIframeView(vp, url);
+        }
+      }
+
+      // 1. ColtBrowser LITE Home View (colt://home)
+      function renderHomeView(vp) {
+        vp.innerHTML = `
+          <div class="max-w-2xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center text-center">
+            
+            <!-- Muir Middle School & Low-Memory Status Pills -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
+              <span class="px-2.5 py-1 rounded bg-muir-navy text-muir-gold text-xs font-bold">
+                ColtBrowser LITE &bull; Built for Muir Middle School (HVS)
+              </span>
+              <span class="px-2.5 py-1 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-mono font-semibold">
+                &#9679; Low-Memory Mode Active
+              </span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-muir-navy dark:text-white mb-1">
+              ColtBrowser <span class="text-muir-gold">LITE</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-zinc-400 mb-6">
+              Instant, zero-lag DuckDuckGo search &amp; study workspace for HVS Chromebooks
+            </p>
+
+            <!-- Centered DuckDuckGo Search Bar -->
+            <form id="home-search-form" class="w-full mb-6">
+              <div class="flex items-center bg-white dark:bg-zinc-900 border-2 border-muir-navy dark:border-muir-gold rounded-lg p-1.5">
+                <span class="px-2.5 text-xs font-mono font-bold text-muir-navy dark:text-muir-gold">DDG</span>
+                <input
+                  id="home-search-input"
+                  type="text"
+                  placeholder="Search DuckDuckGo privately or type a website URL..."
+                  class="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none px-1"
+                  autofocus
+                />
+                <button type="submit" class="px-4 py-2 rounded bg-muir-navy hover:bg-muir-navyDark text-white text-xs font-bold flex-shrink-0">
+                  Search
+                </button>
+              </div>
+            </form>
+
+            <!-- 5-Button Quick Links Row -->
+            <div class="w-full mb-6">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 text-left">
+                Muir &amp; HVS Quick Links
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                ${DEFAULT_BOOKMARKS.map(item => `
+                  <button data-quick-url="${esc(item.url)}" class="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-muir-navy dark:hover:border-muir-gold text-xs font-bold text-muir-navy dark:text-zinc-100 truncate">
+                    ${esc(item.title)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Compact Auto-Saved Quick Note Box -->
+            <div class="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-left">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-bold text-muir-navy dark:text-muir-gold uppercase tracking-wider">
+                  Quick Note (Auto-Saved)
+                </span>
+                <span id="note-status" class="text-[11px] font-mono text-slate-400">Stored locally</span>
+              </div>
+              <textarea
+                id="quick-note-box"
+                rows="3"
+                placeholder="Jot down homework, class periods, or research links here..."
+                class="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded p-2 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-muir-navy dark:focus:border-muir-gold resize-none"
+              >${esc(state.note)}</textarea>
+            </div>
+
+          </div>
+        `;
+
+        document.getElementById('home-search-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = document.getElementById('home-search-input').value;
+          if (val.trim()) navigateActive(val);
+        });
+
+        vp.querySelectorAll('[data-quick-url]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-quick-url')));
+        });
+
+        const noteBox = document.getElementById('quick-note-box');
+        noteBox.addEventListener('input', (e) => {
+          state.note = e.target.value;
+          save('note', state.note);
+          document.getElementById('note-status').textContent = 'Saved';
+        });
+      }
+
+      // 2. DuckDuckGo Instant Answer Search View (colt://search?q=...)
+      async function renderSearchView(vp, query) {
+        const externalDdg = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+
+        vp.innerHTML = `
+          <div class="max-w-3xl mx-auto px-4 py-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-200 dark:border-zinc-800">
+              <div>
+                <h2 class="text-sm sm:text-base font-bold">DuckDuckGo: "${esc(query)}"</h2>
+                <p class="text-[11px] text-slate-500 dark:text-zinc-400">Lightweight Instant Answer Results &bull; Zero Tracking</p>
+              </div>
+              <a href="${externalDdg}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-muir-navy hover:bg-muir-navyDark text-white text-xs font-bold">
+                Open Full Results on DuckDuckGo &nearr;
+              </a>
+            </div>
+            <div id="ddg-list" class="space-y-3 text-xs sm:text-sm">
+              <p class="text-slate-500 dark:text-zinc-400 font-mono text-xs">Loading DuckDuckGo Instant Answers...</p>
+            </div>
+          </div>
+        `;
+
+        const listEl = document.getElementById('ddg-list');
+
+        try {
+          const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+          const data = await res.json();
+          let html = '';
+
+          if (data.AbstractText) {
+            html += `
+              <div class="p-3.5 rounded-lg bg-white dark:bg-zinc-900 border-l-4 border-muir-gold border border-slate-200 dark:border-zinc-800">
+                <div class="text-[11px] font-mono font-bold text-muir-navy dark:text-muir-gold uppercase mb-1">
+                  Instant Answer ${data.AbstractSource ? '&bull; ' + esc(data.AbstractSource) : ''}
+                </div>
+                <h3 class="text-base font-bold mb-1">${esc(data.Heading || query)}</h3>
+                <p class="text-xs sm:text-sm text-slate-700 dark:text-zinc-300 leading-relaxed mb-2">${esc(data.AbstractText)}</p>
+                ${data.AbstractURL ? `
+                  <button data-open-url="${esc(data.AbstractURL)}" class="ddg-link text-xs font-bold text-muir-navy dark:text-muir-gold hover:underline">
+                    Open Source in ColtBrowser LITE &rarr;
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          }
+
+          if (data.Answer) {
+            html += `
+              <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 font-mono text-xs text-emerald-900 dark:text-emerald-200">
+                ${esc(data.Answer)}
+              </div>
+            `;
+          }
+
+          const related = [];
+          if (Array.isArray(data.RelatedTopics)) {
+            data.RelatedTopics.forEach(item => {
+              if (item.Text && item.FirstURL) related.push(item);
+              else if (Array.isArray(item.Topics)) {
+                item.Topics.forEach(sub => {
+                  if (sub.Text && sub.FirstURL) related.push(sub);
+                });
+              }
+            });
+          }
+
+          if (related.length > 0) {
+            html += related.slice(0, 8).map(topic => {
+              const split = topic.Text.split(' - ');
+              const title = split[0] || topic.Text;
+              const desc = split.slice(1).join(' - ') || topic.Text;
+              return `
+                <div class="p-3 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+                  <div class="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 truncate">${esc(topic.FirstURL)}</div>
+                  <button data-open-url="${esc(topic.FirstURL)}" class="ddg-link text-left text-sm font-bold text-blue-700 dark:text-sky-400 hover:underline my-0.5 block">
+                    ${esc(title)}
+                  </button>
+                  <p class="text-xs text-slate-600 dark:text-zinc-400">${esc(desc)}</p>
+                </div>
+              `;
+            }).join('');
+          }
+
+          if (!html) {
+            html = `
+              <div class="p-4 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs">
+                <p class="mb-2">No instant summary available for <strong>"${esc(query)}"</strong>.</p>
+                <a href="${externalDdg}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded bg-muir-gold text-muir-navyDark font-bold">
+                  View Web Results on DuckDuckGo &nearr;
+                </a>
+              </div>
+            `;
+          }
+
+          listEl.innerHTML = html;
+          listEl.querySelectorAll('.ddg-link').forEach(btn => {
+            btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-open-url')));
+          });
+        } catch (err) {
+          listEl.innerHTML = `
+            <div class="p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs">
+              <p class="font-bold text-rose-700 dark:text-rose-300 mb-2">Could not fetch instant answers offline or behind school filter.</p>
+              <a href="${externalDdg}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded bg-muir-navy text-white font-bold">
+                Open on DuckDuckGo.com &nearr;
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      // 3. Lightweight Site Iframe Viewport with Dismissible Top Bar
+      function renderIframeView(vp, url) {
+        const dismissed = !!state.dismissedBannerUrls[url];
+
+        vp.innerHTML = `
+          <div class="h-full w-full flex flex-col">
+            ${dismissed ? '' : `
+              <div id="iframe-banner" class="bg-amber-50 dark:bg-zinc-900 border-b border-amber-300 dark:border-zinc-700 px-3 py-1.5 flex items-center justify-between gap-2 text-xs">
+                <span class="truncate text-slate-700 dark:text-zinc-300">
+                  If <strong class="font-mono">${esc(url)}</strong> refuses to connect inside this frame, open it directly:
+                </span>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-0.5 rounded bg-muir-navy text-white font-bold">
+                    Open in New Browser Tab &nearr;
+                  </a>
+                  <button id="btn-dismiss-banner" title="Dismiss Banner" class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-zinc-700 font-bold">
+                    &times;
+                  </button>
+                </div>
+              </div>
+            `}
+            <iframe
+              src="${esc(url)}"
+              class="flex-1 w-full h-full border-0 bg-white"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              referrerpolicy="no-referrer"
+              title="ColtBrowser LITE Viewport"
+            ></iframe>
+          </div>
+        `;
+
+        const dismissBtn = document.getElementById('btn-dismiss-banner');
+        if (dismissBtn) {
+          dismissBtn.addEventListener('click', () => {
+            state.dismissedBannerUrls[url] = true;
+            const banner = document.getElementById('iframe-banner');
+            if (banner) banner.remove();
+          });
+        }
+      }
+
+      // --- Bookmarks & History Slide-Over Drawer ---
+      function toggleDrawer(force) {
+        state.drawerOpen = typeof force === 'boolean' ? force : !state.drawerOpen;
+        const drawer = document.getElementById('library-drawer');
+        drawer.classList.toggle('hidden', !state.drawerOpen);
+        drawer.classList.toggle('flex', state.drawerOpen);
+        if (state.drawerOpen) renderDrawer();
+      }
+
+      function renderDrawer() {
+        const bmTab = document.getElementById('tab-drawer-bm');
+        const histTab = document.getElementById('tab-drawer-hist');
+        const list = document.getElementById('drawer-list');
+        const status = document.getElementById('drawer-status');
+
+        const activeCls = 'py-2 bg-slate-100 dark:bg-zinc-800 text-muir-navy dark:text-muir-gold border-b-2 border-muir-navy dark:border-muir-gold';
+        const idleCls = 'py-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50';
+
+        bmTab.className = state.drawerTab === 'bookmarks' ? activeCls : idleCls;
+        histTab.className = state.drawerTab === 'history' ? activeCls : idleCls;
+
+        if (state.drawerTab === 'bookmarks') {
+          status.textContent = `${state.bookmarks.length} saved bookmarks`;
+          if (state.bookmarks.length === 0) {
+            list.innerHTML = `<p class="text-slate-400 text-center py-6">No bookmarks saved.</p>`;
+            return;
+          }
+          list.innerHTML = state.bookmarks.map((bm, i) => `
+            <div class="flex items-center justify-between gap-2 p-2 rounded border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/60">
+              <button data-nav-url="${esc(bm.url)}" class="drawer-go text-left overflow-hidden flex-1">
+                <div class="font-bold truncate">${esc(bm.title)}</div>
+                <div class="text-[11px] font-mono text-slate-400 truncate">${esc(bm.url)}</div>
+              </button>
+              <button data-del-bm="${i}" title="Delete Bookmark" class="px-1.5 py-0.5 rounded text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-950 font-bold">
+                &times;
+              </button>
+            </div>
+          `).join('');
+
+          list.querySelectorAll('[data-del-bm]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const idx = Number(btn.getAttribute('data-del-bm'));
+              state.bookmarks.splice(idx, 1);
+              save('bookmarks', state.bookmarks);
+              renderBookmarksBar();
+              renderDrawer();
+              render();
+            });
+          });
+        } else {
+          status.textContent = `${state.history.length} / ${MAX_HISTORY} history items`;
+          if (state.history.length === 0) {
+            list.innerHTML = `<p class="text-slate-400 text-center py-6">History is empty.</p>`;
+            return;
+          }
+          list.innerHTML = state.history.map(h => `
+            <button data-nav-url="${esc(h.url)}" class="drawer-go w-full flex items-center justify-between gap-2 p-2 rounded border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/60 text-left">
+              <div class="overflow-hidden">
+                <div class="font-semibold truncate">${esc(h.title)}</div>
+                <div class="text-[11px] font-mono text-slate-400 truncate">${esc(h.url)}</div>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 flex-shrink-0">${esc(h.time)}</span>
+            </button>
+          `).join('');
+        }
+
+        list.querySelectorAll('.drawer-go').forEach(btn => {
+          btn.addEventListener('click', () => {
+            navigateActive(btn.getAttribute('data-nav-url'));
+            toggleDrawer(false);
+          });
+        });
+      }
+
+      // --- Toggle Current Page Bookmark ---
+      function toggleCurrentBookmark() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const url = tab.stack[tab.index] || 'colt://home';
+        if (url === 'colt://home') {
+          notify('Home page is already accessible via Home button');
+          return;
+        }
+        const idx = state.bookmarks.findIndex(b => b.url === url);
+        if (idx !== -1) {
+          state.bookmarks.splice(idx, 1);
+          notify('Bookmark removed');
+        } else {
+          state.bookmarks.push({ title: tab.title, url });
+          notify('Bookmarked');
+        }
+        save('bookmarks', state.bookmarks);
+        renderBookmarksBar();
+        updateToolbar(tab, url);
+        if (state.drawerOpen) renderDrawer();
+      }
+
+      // --- HTML Escape ---
+      function esc(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // --- Event Wiring ---
+      function bindEvents() {
+        document.getElementById('btn-new-tab').addEventListener('click', () => createTab('colt://home'));
+        document.getElementById('btn-back').addEventListener('click', goBack);
+        document.getElementById('btn-forward').addEventListener('click', goForward);
+        document.getElementById('btn-reload').addEventListener('click', reloadTab);
+        document.getElementById('btn-home').addEventListener('click', () => navigateActive('colt://home'));
+        document.getElementById('btn-bookmark').addEventListener('click', toggleCurrentBookmark);
+        document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+
+        const omniboxForm = document.getElementById('omnibox-form');
+        const omniboxInput = document.getElementById('omnibox-input');
+        omniboxForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          navigateActive(omniboxInput.value);
+          omniboxInput.blur();
+        });
+        omniboxInput.addEventListener('focus', () => omniboxInput.select());
+
+        document.getElementById('btn-drawer').addEventListener('click', () => toggleDrawer());
+        document.getElementById('btn-close-drawer').addEventListener('click', () => toggleDrawer(false));
+        document.getElementById('tab-drawer-bm').addEventListener('click', () => {
+          state.drawerTab = 'bookmarks';
+          renderDrawer();
+        });
+        document.getElementById('tab-drawer-hist').addEventListener('click', () => {
+          state.drawerTab = 'history';
+          renderDrawer();
+        });
+
+        document.getElementById('btn-clear-data').addEventListener('click', () => {
+          state.history = [];
+          state.bookmarks = [...DEFAULT_BOOKMARKS];
+          save('history', state.history);
+          save('bookmarks', state.bookmarks);
+          renderBookmarksBar();
+          renderDrawer();
+          render();
+          notify('History cleared & default bookmarks restored');
+        });
+      }
+
+      // --- Instant Boot ---
+      initStorage();
+      bindEvents();
+      renderBookmarksBar();
+      createTab('colt://home');
+    })();
+  </script>
+</body>
+</html>
