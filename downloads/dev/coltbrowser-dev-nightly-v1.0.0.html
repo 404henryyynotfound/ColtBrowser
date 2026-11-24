@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColtBrowser DEV (v2.0.0-nightly) — Built for Muir Middle School (HVS)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-chrome: #0d1320;
+      --bg-toolbar: #111827;
+      --bg-card: #131c2e;
+      --border-1px: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #06b6d4;
+      --accent-hover: #0891b2;
+      --accent-soft: rgba(6, 182, 212, 0.14);
+      --accent-border: rgba(6, 182, 212, 0.4);
+    }
+
+    /* Theme: Muir Colts Dev Navy & Gold */
+    html.theme-muir-dev {
+      --bg-base: #06101e;
+      --bg-chrome: #09182d;
+      --bg-toolbar: #0e223f;
+      --bg-card: #11284a;
+      --border-1px: #1d3b66;
+      --text-main: #f8fafc;
+      --text-muted: #93c5fd;
+      --accent: #eab308;
+      --accent-hover: #ca8a04;
+      --accent-soft: rgba(234, 179, 8, 0.16);
+      --accent-border: rgba(234, 179, 8, 0.45);
+    }
+
+    /* Theme: Solarized Light */
+    html.theme-solarized {
+      --bg-base: #fdf6e3;
+      --bg-chrome: #eee8d5;
+      --bg-toolbar: #f5efdc;
+      --bg-card: #eee8d5;
+      --border-1px: #d3cbb8;
+      --text-main: #073642;
+      --text-muted: #586e75;
+      --accent: #2aa198;
+      --accent-hover: #21857d;
+      --accent-soft: rgba(42, 161, 152, 0.14);
+      --accent-border: rgba(42, 161, 152, 0.45);
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+    }
+    .dev-chrome {
+      background-color: var(--bg-chrome);
+      border-color: var(--border-1px);
+    }
+    .dev-toolbar {
+      background-color: var(--bg-toolbar);
+      border-color: var(--border-1px);
+    }
+    .dev-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-1px);
+    }
+    .dev-border {
+      border-color: var(--border-1px);
+    }
+    .dev-muted {
+      color: var(--text-muted);
+    }
+    .dev-accent-bg {
+      background-color: var(--accent);
+      color: #06101e;
+    }
+    .dev-accent-bg:hover {
+      background-color: var(--accent-hover);
+    }
+    .dev-accent-text {
+      color: var(--accent);
+    }
+    .dev-accent-soft {
+      background-color: var(--accent-soft);
+      border-color: var(--accent-border);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Custom subtle scrollbars for IDE panes */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 8px var(--accent-soft); }
+      50% { box-shadow: 0 0 16px var(--accent-border); }
+    }
+    .dev-badge-glow {
+      animation: pulseGlow 2.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
+
+  <!-- TOP IDE BROWSER CHROME -->
+  <header class="dev-chrome border-b flex flex-col flex-shrink-0 z-20">
+    
+    <!-- Row 1: Tab Strip & Developer Branding -->
+    <div class="flex items-center px-2 pt-1.5 gap-2">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-2 pr-2 py-1 flex-shrink-0">
+        <div class="w-6 h-6 rounded dev-accent-bg flex items-center justify-center font-mono font-extrabold text-xs">
+          &gt;_
+        </div>
+        <span class="text-xs font-extrabold tracking-tight">ColtBrowser <span class="dev-accent-text">DEV</span></span>
+        <span class="dev-badge-glow px-1.5 py-0.5 text-[10px] font-mono font-bold rounded dev-accent-soft dev-accent-text border">
+          DEV BUILD v2.0.0-nightly
+        </span>
+        <span class="hidden xl:inline-flex items-center gap-1 text-[11px] font-mono dev-muted border-l dev-border pl-2">
+          Muir Middle School (HVS) &bull; Henry Green
+        </span>
+      </div>
+
+      <!-- Scrollable Multi-Tab Strip -->
+      <div id="tab-strip" class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- New Tab, Theme Switcher & About -->
+      <div class="flex items-center gap-1.5 pb-1 flex-shrink-0">
+        <button id="btn-new-tab" title="New Tab (Ctrl+T)" class="px-2 py-1 rounded border dev-border hover:opacity-80 text-xs font-mono font-bold">
+          +
+        </button>
+        <select id="theme-switcher" title="Switch IDE Theme" class="dev-toolbar border dev-border rounded px-2 py-1 text-[11px] font-mono focus:outline-none">
+          <option value="cyber">Cyber Dark</option>
+          <option value="muir-dev">Muir Colts Dev</option>
+          <option value="solarized">Solarized Light</option>
+        </select>
+        <button id="btn-about" title="About ColtBrowser DEV" class="px-2 py-1 rounded border dev-border hover:opacity-80 text-[11px] font-mono">
+          About
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Navigation, Telemetry Omnibox & DevTools Controls -->
+    <div class="dev-toolbar border-t px-2 py-1.5 flex items-center gap-1.5">
+      <!-- Navigation Controls -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-back" title="Back" disabled class="p-1.5 rounded border dev-border hover:opacity-80 disabled:opacity-30 disabled:pointer-events-none">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-forward" title="Forward" disabled class="p-1.5 rounded border dev-border hover:opacity-80 disabled:opacity-30 disabled:pointer-events-none">
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-reload" title="Reload" class="p-1.5 rounded border dev-border hover:opacity-80">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-home" title="Developer Home (colt://home)" class="p-1.5 rounded border dev-border hover:opacity-80">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Unified Omnibox with HTTP / Route Status Badge -->
+      <form id="omnibox-form" class="flex-1 flex items-center dev-chrome border dev-border focus-within:border-cyan-400 rounded-md px-2.5 py-1">
+        <span id="status-badge" class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mr-2 flex-shrink-0">
+          INTERNAL
+        </span>
+        <input
+          id="omnibox-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search DuckDuckGo (!gh, !mdn, !wiki), enter URL, or colt://sandbox, colt://flags, colt://network..."
+          class="w-full bg-transparent text-xs font-mono focus:outline-none"
+        />
+        <button type="button" id="btn-bookmark" title="Toggle Bookmark" class="px-1.5 dev-muted hover:text-amber-400 flex-shrink-0">
+          <i id="icon-bookmark" data-lucide="star" class="w-3.5 h-3.5"></i>
+        </button>
+        <button type="submit" class="ml-1 px-2.5 py-0.5 rounded dev-accent-bg text-[11px] font-mono font-bold flex-shrink-0">
+          EXEC
+        </button>
+      </form>
+
+      <!-- Quick Internal Routes & DevTools Toggle -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-route-sandbox" title="Open Live HTML/CSS/JS Sandbox (colt://sandbox)" class="hidden md:flex items-center gap-1 px-2 py-1 rounded border dev-border hover:opacity-80 text-[11px] font-mono">
+          <i data-lucide="code-2" class="w-3.5 h-3.5 dev-accent-text"></i>
+          <span>Sandbox</span>
+        </button>
+        <button id="btn-route-flags" title="Experimental Feature Flags (colt://flags)" class="hidden lg:flex items-center gap-1 px-2 py-1 rounded border dev-border hover:opacity-80 text-[11px] font-mono">
+          <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Flags</span>
+        </button>
+        <button id="btn-devtools" title="Toggle Built-in DevTools (F12)" class="flex items-center gap-1.5 px-2.5 py-1 rounded dev-accent-bg text-[11px] font-mono font-bold">
+          <i data-lucide="panel-bottom" class="w-3.5 h-3.5"></i>
+          <span>DevTools</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 3: Quick Dev & School Bookmarks Bar -->
+    <div id="bookmarks-bar" class="dev-chrome border-t px-2.5 py-1 flex items-center justify-between gap-2 text-[11px] font-mono">
+      <div id="bookmarks-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 dev-muted">
+        <span id="hud-fps" class="hidden text-emerald-400 font-bold">60 FPS</span>
+        <span id="hud-mem" class="hidden text-cyan-400">LS: 0 KB</span>
+        <button id="btn-history-drawer" class="hover:underline">History (<span id="hist-count">0</span>)</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE (VIEWPORT + DOCKABLE DEVTOOLS) -->
+  <main id="workspace-main" class="flex-1 flex flex-col overflow-hidden relative">
+    
+    <!-- Matrix Rain Canvas Overlay (Enabled via Feature Flag) -->
+    <canvas id="matrix-canvas" class="hidden fixed inset-0 pointer-events-none opacity-15 z-0"></canvas>
+
+    <!-- Primary Browser Viewport -->
+    <div id="viewport" class="flex-1 overflow-y-auto relative z-10">
+      <!-- Dynamic views: colt://home, colt://sandbox, colt://network, colt://flags, colt://settings, colt://search, or Web Iframe -->
+    </div>
+
+    <!-- DOCKABLE BUILT-IN DEVTOOLS PANEL (Bottom or Right) -->
+    <section id="devtools-panel" class="hidden dev-chrome border-t flex-col z-20 flex-shrink-0" style="height: 44%; min-height: 220px;">
+      <!-- DevTools Header Bar -->
+      <div class="dev-toolbar border-b px-2.5 py-1 flex items-center justify-between gap-2 text-xs font-mono">
+        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <button data-dt-tab="console" class="dt-tab-btn px-2.5 py-1 rounded font-bold dev-accent-soft dev-accent-text border">
+            Console
+          </button>
+          <button data-dt-tab="sandbox" class="dt-tab-btn px-2.5 py-1 rounded dev-muted hover:opacity-90">
+            Live Sandbox
+          </button>
+          <button data-dt-tab="network" class="dt-tab-btn px-2.5 py-1 rounded dev-muted hover:opacity-90">
+            Network &amp; Storage
+          </button>
+          <button data-dt-tab="flags" class="dt-tab-btn px-2.5 py-1 rounded dev-muted hover:opacity-90">
+            Flags
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <button id="btn-dt-dock" title="Toggle Dock Position (Bottom / Right)" class="px-2 py-0.5 rounded border dev-border text-[11px] hover:opacity-80">
+            Dock: <span id="dt-dock-label">Bottom</span>
+          </button>
+          <button id="btn-dt-close" title="Close DevTools (F12)" class="px-2 py-0.5 rounded border dev-border text-[11px] hover:bg-rose-500/20 hover:text-rose-400">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <!-- DevTools Body -->
+      <div id="devtools-body" class="flex-1 overflow-hidden flex flex-col">
+        <!-- Populated based on active DevTools tab -->
+      </div>
+    </section>
+
+    <!-- Slide-Over History Drawer -->
+    <aside id="history-drawer" class="hidden fixed right-0 top-0 bottom-0 w-80 sm:w-96 dev-chrome border-l z-40 flex-col shadow-2xl">
+      <div class="dev-toolbar border-b px-3 py-2.5 flex items-center justify-between font-mono text-xs">
+        <span class="font-bold dev-accent-text">NAVIGATION TELEMETRY LOG</span>
+        <button id="btn-close-history" class="px-2 py-0.5 rounded border dev-border">&times;</button>
+      </div>
+      <div id="history-list" class="flex-1 overflow-y-auto p-2.5 space-y-1.5 font-mono text-xs"></div>
+      <div class="dev-toolbar border-t p-2.5 flex items-center justify-between font-mono text-[11px]">
+        <span id="history-footer-count" class="dev-muted">0 entries</span>
+        <button id="btn-clear-history" class="px-2.5 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold">
+          Purge History
+        </button>
+      </div>
+    </aside>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center p-4">
+      <div class="dev-card border rounded-xl max-w-lg w-full p-5 font-mono space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b dev-border pb-3">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded dev-accent-bg text-xs font-extrabold">DEV</span>
+            <h3 class="text-sm font-bold">ColtBrowser DEV v2.0.0-nightly</h3>
+          </div>
+          <button id="btn-close-about" class="px-2 py-0.5 rounded border dev-border text-xs">&times;</button>
+        </div>
+        <div class="text-xs space-y-2 leading-relaxed">
+          <p><strong>Author:</strong> Henry Green</p>
+          <p><strong>Target Institution:</strong> Built for Muir Middle School (Huron Valley Schools — HVS)</p>
+          <p><strong>License:</strong> Copyright &copy; 2026 Henry Green. Licensed under the <strong>Apache License 2.0</strong>. Branding and product names (<em>ColtBrowser</em>, <em>ColtBrowser DEV</em>) are reserved.</p>
+          <div class="p-3 rounded dev-chrome border dev-border text-[11px] dev-muted space-y-1">
+            <div class="font-bold text-emerald-400">Developer Capabilities:</div>
+            <div>&bull; Interactive JavaScript REPL Console &amp; <code>colt</code> global API</div>
+            <div>&bull; Live HTML/CSS/JS Playground with 1-click <code>.html</code> bundle export</div>
+            <div>&bull; Network Fetch Telemetry &amp; <code>localStorage</code> Inspector</div>
+            <div>&bull; Experimental Runtime Flags (<code>colt://flags</code>) &amp; Sandbox Inspector</div>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button id="btn-about-ok" class="px-4 py-1.5 rounded dev-accent-bg text-xs font-bold">Acknowledge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Status Toast -->
+    <div id="dev-toast" class="hidden fixed bottom-4 right-4 px-3 py-1.5 rounded dev-card border dev-accent-text font-mono text-xs font-bold shadow-lg z-50">
+      [OK] Ready
+    </div>
+  </main>
+
+  <script>
+    /**
+     * ColtBrowser DEV (v2.0.0-nightly)
+     * Built by Henry Green for Muir Middle School (HVS)
+     * Storage Namespace: coltbrowser_dev_
+     */
+    (function () {
+      const PREFIX = 'coltbrowser_dev_';
+
+      // --- Starter Templates for Live Sandbox ---
+      const SANDBOX_TEMPLATES = {
+        muirCard: {
+          name: 'Muir Colts Student Card',
+          html: `<div class="card">
+  <span class="badge">HVS • MUIR MIDDLE SCHOOL</span>
+  <h1>Go Colts! 🐎</h1>
+  <p>Built inside ColtBrowser DEV v2.0.0-nightly Sandbox.</p>
+  <button id="cheerBtn">Boost Spirit: 0</button>
+</div>`,
+          css: `body {
+  font-family: system-ui, sans-serif;
+  background: #06101e;
+  color: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.card {
+  background: #0f294a;
+  border: 2px solid #eab308;
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  max-width: 340px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+.badge {
+  background: rgba(234, 179, 8, 0.18);
+  color: #eab308;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+button {
+  margin-top: 14px;
+  background: #eab308;
+  color: #06101e;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}`,
+          js: `let count = 0;
+const btn = document.getElementById('cheerBtn');
+btn.addEventListener('click', () => {
+  count++;
+  btn.textContent = 'Boost Spirit: ' + count;
+});`
+        },
+        jsCalc: {
+          name: 'JS Quick Calculator',
+          html: `<div class="calc">
+  <h3>Colt Calc</h3>
+  <input id="a" type="number" value="12" /> +
+  <input id="b" type="number" value="30" />
+  <button onclick="calc()">=</button>
+  <div id="out">Result: 42</div>
+</div>`,
+          css: `body { font-family: monospace; background: #090d16; color: #06b6d4; padding: 24px; }
+.calc { border: 1px solid #1e293b; padding: 20px; border-radius: 12px; max-width: 320px; }
+input { width: 70px; padding: 6px; background: #111827; color: #fff; border: 1px solid #334155; border-radius: 6px; }
+button { padding: 6px 14px; background: #06b6d4; color: #090d16; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
+#out { margin-top: 14px; font-size: 18px; color: #10b981; }`,
+          js: `function calc() {
+  const a = Number(document.getElementById('a').value);
+  const b = Number(document.getElementById('b').value);
+  document.getElementById('out').textContent = 'Result: ' + (a + b);
+}`
+        },
+        cssPulse: {
+          name: 'Cyber Radar Animation',
+          html: `<div class="wrap">
+  <div class="radar"></div>
+  <p>SCANNING MUIR NETWORK...</p>
+</div>`,
+          css: `body { margin: 0; height: 100vh; display: grid; place-items: center; background: #05080f; color: #10b981; font-family: monospace; }
+.wrap { text-align: center; }
+.radar {
+  width: 90px; height: 90px; margin: 0 auto 16px;
+  border-radius: 50%; border: 3px solid #10b981;
+  animation: pulse 1.5s infinite ease-out;
+}
+@keyframes pulse {
+  0% { transform: scale(0.7); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}`,
+          js: `console.log('Cyber Radar initialized');`
+        }
+      };
+
+      const DEFAULT_BOOKMARKS = [
+        { title: 'HVS Portal', url: 'https://www.hvs.org' },
+        { title: 'MDN Web Docs', url: 'https://developer.mozilla.org' },
+        { title: 'GitHub', url: 'https://github.com' },
+        { title: 'Desmos', url: 'https://www.desmos.com/calculator' },
+        { title: 'W3Schools', url: 'https://www.w3schools.com' },
+        { title: 'colt://sandbox', url: 'colt://sandbox' },
+        { title: 'colt://flags', url: 'colt://flags' },
+        { title: 'colt://network', url: 'colt://network' }
+      ];
+
+      const DEFAULT_FLAGS = {
+        matrixRain: {
+          name: 'Matrix Rain Home Background',
+          desc: 'Renders a low-opacity falling code rain canvas behind ColtBrowser DEV.',
+          enabled: false
+        },
+        strictCspSim: {
+          name: 'Strict CSP Simulator',
+          desc: 'Strips allow-same-origin from sandboxed iframes by default to test strict isolation.',
+          enabled: false
+        },
+        telemetryHud: {
+          name: 'FPS & Memory Telemetry HUD',
+          desc: 'Displays live frame rate (FPS) and localStorage footprint in the top bookmarks bar.',
+          enabled: true
+        },
+        vimKeys: {
+          name: 'Vim Navigation Keybindings',
+          desc: 'Enables Alt+H (Back), Alt+L (Forward), Alt+J/K (Switch Tabs), and / (Focus Omnibox).',
+          enabled: true
+        },
+        jsonPretty: {
+          name: 'JSON Pretty-Printer',
+          desc: 'Formats raw DuckDuckGo API responses with 2-space indentation and syntax coloring.',
+          enabled: true
+        }
+      };
+
+      // --- State ---
+      const state = {
+        tabs: [],
+        activeTabId: null,
+        theme: 'cyber', // 'cyber' | 'muir-dev' | 'solarized'
+        bookmarks: [],
+        history: [],
+        flags: {},
+        sandbox: {
+          html: SANDBOX_TEMPLATES.muirCard.html,
+          css: SANDBOX_TEMPLATES.muirCard.css,
+          js: SANDBOX_TEMPLATES.muirCard.js
+        },
+        iframeSandboxFlags: {
+          'allow-scripts': true,
+          'allow-same-origin': true,
+          'allow-forms': true,
+          'allow-popups': true
+        },
+        devtoolsOpen: false,
+        devtoolsDock: 'bottom', // 'bottom' | 'right'
+        devtoolsTab: 'console', // 'console' | 'sandbox' | 'network' | 'flags'
+        consoleLogs: [],
+        networkLogs: [],
+        showRawDdgJson: false
+      };
+
+      // --- Persistence ---
+      function save(key, val) {
+        try {
+          localStorage.setItem(PREFIX + key, JSON.stringify(val));
+          updateTelemetryHud();
+        } catch (e) {}
+      }
+
+      function load(key, fallback) {
+        try {
+          const raw = localStorage.getItem(PREFIX + key);
+          return raw !== null ? JSON.parse(raw) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function initStorage() {
+        state.theme = load('theme', 'cyber');
+        state.bookmarks = load('bookmarks', [...DEFAULT_BOOKMARKS]);
+        state.history = load('history', []);
+        const savedFlags = load('flags', {});
+        state.flags = {};
+        Object.keys(DEFAULT_FLAGS).forEach(k => {
+          state.flags[k] = {
+            ...DEFAULT_FLAGS[k],
+            enabled: typeof savedFlags[k]?.enabled === 'boolean' ? savedFlags[k].enabled : DEFAULT_FLAGS[k].enabled
+          };
+        });
+        state.sandbox = load('sandbox', { ...state.sandbox });
+        state.devtoolsDock = load('devtoolsDock', 'bottom');
+      }
+
+      // --- Logging & Network Telemetry ---
+      function logConsole(level, message) {
+        const entry = {
+          level, // 'INFO' | 'NET' | 'WARN' | 'ERR' | 'EVAL'
+          time: new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          message: String(message)
+        };
+        state.consoleLogs.push(entry);
+        if (state.consoleLogs.length > 200) state.consoleLogs.shift();
+        if (state.devtoolsOpen && state.devtoolsTab === 'console') {
+          renderDevToolsBody();
+        }
+      }
+
+      function logNetwork(method, url, status, durationMs, type) {
+        state.networkLogs.unshift({
+          id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+          method,
+          url,
+          status,
+          durationMs,
+          type,
+          time: new Date().toLocaleTimeString([], { hour12: false })
+        });
+        if (state.networkLogs.length > 100) state.networkLogs.pop();
+        logConsole('NET', `${method} ${url} -> ${status} (${durationMs}ms)`);
+        if (state.devtoolsOpen && state.devtoolsTab === 'network') {
+          renderDevToolsBody();
+        }
+      }
+
+      // --- Global `colt` API exposed to Console REPL ---
+      window.colt = {
+        version: 'v2.0.0-nightly',
+        author: 'Henry Green',
+        school: 'Muir Middle School (HVS)',
+        open: (url) => navigateActive(url),
+        newTab: (url = 'colt://home') => createTab(url),
+        tabs: () => state.tabs.map(t => ({ id: t.id, title: t.title, url: t.stack[t.index] })),
+        flags: () => Object.fromEntries(Object.entries(state.flags).map(([k, v]) => [k, v.enabled])),
+        toggleFlag: (flagKey) => {
+          if (!state.flags[flagKey]) return `Unknown flag: ${flagKey}`;
+          state.flags[flagKey].enabled = !state.flags[flagKey].enabled;
+          save('flags', state.flags);
+          applyFeatureFlags();
+          render();
+          return `${flagKey} = ${state.flags[flagKey].enabled}`;
+        },
+        clearStorage: () => {
+          Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).forEach(k => localStorage.removeItem(k));
+          return 'Cleared all coltbrowser_dev_* keys';
+        }
+      };
+
+      // --- Theme & Feature Flags ---
+      function applyTheme() {
+        const html = document.documentElement;
+        html.classList.remove('dark', 'theme-muir-dev', 'theme-solarized');
+        if (state.theme === 'muir-dev') {
+          html.classList.add('dark', 'theme-muir-dev');
+        } else if (state.theme === 'solarized') {
+          html.classList.add('theme-solarized');
+        } else {
+          html.classList.add('dark');
+        }
+        document.getElementById('theme-switcher').value = state.theme;
+      }
+
+      let matrixAnimId = null;
+      function applyFeatureFlags() {
+        // 1. Telemetry HUD
+        const hudEnabled = state.flags.telemetryHud.enabled;
+        document.getElementById('hud-fps').classList.toggle('hidden', !hudEnabled);
+        document.getElementById('hud-mem').classList.toggle('hidden', !hudEnabled);
+
+        // 2. Strict CSP Simulator
+        if (state.flags.strictCspSim.enabled) {
+          state.iframeSandboxFlags['allow-same-origin'] = false;
+        }
+
+        // 3. Matrix Rain Canvas
+        const canvas = document.getElementById('matrix-canvas');
+        if (state.flags.matrixRain.enabled) {
+          canvas.classList.remove('hidden');
+          startMatrixRain(canvas);
+        } else {
+          canvas.classList.add('hidden');
+          if (matrixAnimId) cancelAnimationFrame(matrixAnimId);
+        }
+      }
+
+      function startMatrixRain(canvas) {
+        if (matrixAnimId) cancelAnimationFrame(matrixAnimId);
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const cols = Math.floor(canvas.width / 16);
+        const drops = Array(cols).fill(1);
+        const chars = '01COLTDEVHVS<>/{}';
+
+        function draw() {
+          ctx.fillStyle = 'rgba(9, 13, 22, 0.08)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#06b6d4';
+          ctx.font = '13px monospace';
+          for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, i * 16, drops[i] * 16);
+            if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+          }
+          matrixAnimId = requestAnimationFrame(draw);
+        }
+        draw();
+      }
+
+      // --- Live FPS & Storage Telemetry ---
+      function startTelemetryLoop() {
+        let frames = 0;
+        let lastTime = performance.now();
+        function tick(now) {
+          frames++;
+          if (now - lastTime >= 1000) {
+            const fpsEl = document.getElementById('hud-fps');
+            if (fpsEl) fpsEl.textContent = `${frames} FPS`;
+            frames = 0;
+            lastTime = now;
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        updateTelemetryHud();
+      }
+
+      function getLocalStorageKB() {
+        let total = 0;
+        for (let k in localStorage) {
+          if (k.startsWith(PREFIX)) {
+            total += (localStorage[k].length + k.length) * 2;
+          }
+        }
+        return (total / 1024).toFixed(2);
+      }
+
+      function updateTelemetryHud() {
+        const memEl = document.getElementById('hud-mem');
+        if (memEl) memEl.textContent = `LS: ${getLocalStorageKB()} KB`;
+      }
+
+      // --- Toast ---
+      let toastTimer = null;
+      function showToast(msg) {
+        const el = document.getElementById('dev-toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.add('hidden'), 2000);
+      }
+
+      // --- Tab Management ---
+      function createTab(url = 'colt://home') {
+        const id = 'tab_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const tab = {
+          id,
+          title: 'colt://home',
+          status: 'INTERNAL',
+          stack: [],
+          index: -1
+        };
+        state.tabs.push(tab);
+        state.activeTabId = id;
+        navigateTab(id, url, true);
+      }
+
+      function closeTab(id, e) {
+        if (e) e.stopPropagation();
+        const idx = state.tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+        state.tabs.splice(idx, 1);
+        if (state.tabs.length === 0) {
+          createTab('colt://home');
+          return;
+        }
+        if (state.activeTabId === id) {
+          state.activeTabId = state.tabs[Math.min(idx, state.tabs.length - 1)].id;
+        }
+        render();
+      }
+
+      function switchTab(id) {
+        if (state.activeTabId === id) return;
+        state.activeTabId = id;
+        render();
+      }
+
+      function getActiveTab() {
+        return state.tabs.find(t => t.id === state.activeTabId);
+      }
+
+      // --- URL & Bang Parser ---
+      function resolveInput(raw) {
+        const text = (raw || '').trim();
+        if (!text || text === 'colt://home' || text === 'colt://newtab') {
+          return { kind: 'internal', url: 'colt://home' };
+        }
+        if (text === 'colt://devtools') {
+          toggleDevTools(true);
+          return { kind: 'internal', url: 'colt://home' };
+        }
+        if (text.startsWith('colt://search')) {
+          const q = new URLSearchParams(text.split('?')[1] || '').get('q') || '';
+          return { kind: 'search', query: q, url: `colt://search?q=${encodeURIComponent(q)}` };
+        }
+        if (text.startsWith('colt://')) {
+          return { kind: 'internal', url: text.toLowerCase() };
+        }
+
+        // DuckDuckGo Developer Bangs (!gh, !mdn, !wiki, !ddg)
+        if (text.startsWith('!gh ')) {
+          const q = text.slice(4).trim();
+          return { kind: 'web', url: `https://github.com/search?q=${encodeURIComponent(q)}` };
+        }
+        if (text.startsWith('!mdn ')) {
+          const q = text.slice(5).trim();
+          return { kind: 'web', url: `https://developer.mozilla.org/en-US/search?q=${encodeURIComponent(q)}` };
+        }
+        if (text.startsWith('!wiki ')) {
+          const q = text.slice(6).trim();
+          return { kind: 'web', url: `https://en.m.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(q)}` };
+        }
+        if (text.startsWith('!ddg ')) {
+          const q = text.slice(5).trim();
+          return { kind: 'search', query: q, url: `colt://search?q=${encodeURIComponent(q)}` };
+        }
+
+        const hasProto = /^https?:\/\//i.test(text);
+        const isDomain = !/\s/.test(text) && (text.includes('.') || text.startsWith('localhost'));
+        if (hasProto || isDomain) {
+          return { kind: 'web', url: hasProto ? text : 'https://' + text };
+        }
+
+        return {
+          kind: 'search',
+          query: text,
+          url: `colt://search?q=${encodeURIComponent(text)}`
+        };
+      }
+
+      function navigateActive(raw) {
+        const tab = getActiveTab();
+        if (!tab) return;
+        navigateTab(tab.id, raw, true);
+      }
+
+      function navigateTab(tabId, raw, push) {
+        const tab = state.tabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        const target = resolveInput(raw);
+        if (push) {
+          tab.stack = tab.stack.slice(0, tab.index + 1);
+          tab.stack.push(target.url);
+          tab.index = tab.stack.length - 1;
+        }
+
+        updateTabTelemetry(tab, target);
+
+        if (target.url !== 'colt://home') {
+          state.history.unshift({
+            title: tab.title,
+            url: target.url,
+            status: tab.status,
+            time: new Date().toLocaleTimeString([], { hour12: false })
+          });
+          if (state.history.length > 100) state.history.pop();
+          save('history', state.history);
+        }
+
+        if (target.kind === 'web') {
+          logNetwork('NAVIGATE', target.url, 'SANDBOX', 12, 'document');
+        } else {
+          logConsole('INFO', `Routed tab [${tab.id.slice(-4)}] -> ${target.url}`);
+        }
+
+        if (tab.id === state.activeTabId) render();
+        else renderTabs();
+      }
+
+      function updateTabTelemetry(tab, target) {
+        if (target.kind === 'internal') {
+          tab.title = target.url;
+          tab.status = 'INTERNAL';
+        } else if (target.kind === 'search') {
+          tab.title = `ddg: ${target.query}`;
+          tab.status = '200 OK';
+        } else {
+          tab.status = 'SANDBOX';
+          try {
+            tab.title = new URL(target.url).hostname.replace(/^www\./, '');
+          } catch (e) {
+            tab.title = target.url;
+          }
+        }
+      }
+
+      function goBack() {
+        const tab = getActiveTab();
+        if (!tab || tab.index <= 0) return;
+        tab.index--;
+        const url = tab.stack[tab.index];
+        updateTabTelemetry(tab, resolveInput(url));
+        render();
+      }
+
+      function goForward() {
+        const tab = getActiveTab();
+        if (!tab || tab.index >= tab.stack.length - 1) return;
+        tab.index++;
+        const url = tab.stack[tab.index];
+        updateTabTelemetry(tab, resolveInput(url));
+        render();
+      }
+
+      function reloadTab() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        renderViewport(tab.stack[tab.index] || 'colt://home');
+        showToast('[200] Reloaded active viewport');
+      }
+
+      // --- Render Chrome ---
+      function render() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.index] || 'colt://home';
+
+        renderTabs();
+        updateToolbar(tab, currentUrl);
+        renderViewport(currentUrl);
+        document.getElementById('hist-count').textContent = state.history.length;
+        if (state.devtoolsOpen) renderDevToolsBody();
+      }
+
+      function renderTabs() {
+        const strip = document.getElementById('tab-strip');
+        strip.innerHTML = state.tabs.map((t, idx) => {
+          const active = t.id === state.activeTabId;
+          return `
+            <div data-tab-id="${t.id}" class="group flex items-center gap-2 px-2.5 py-1 rounded-t border-t border-x text-xs font-mono cursor-pointer max-w-[210px] min-w-[120px] transition ${
+              active
+                ? 'dev-toolbar dev-accent-text font-bold'
+                : 'dev-muted hover:opacity-90 border-transparent'
+            }">
+              <span class="text-[10px] opacity-60">[${idx + 1}]</span>
+              <span class="truncate flex-1">${esc(t.title)}</span>
+              <button data-close-tab="${t.id}" class="opacity-60 group-hover:opacity-100 hover:text-rose-400 font-bold">&times;</button>
+            </div>
+          `;
+        }).join('');
+
+        strip.querySelectorAll('[data-tab-id]').forEach(el => {
+          el.addEventListener('click', () => switchTab(el.getAttribute('data-tab-id')));
+        });
+        strip.querySelectorAll('[data-close-tab]').forEach(btn => {
+          btn.addEventListener('click', (e) => closeTab(btn.getAttribute('data-close-tab'), e));
+        });
+      }
+
+      function updateToolbar(tab, currentUrl) {
+        document.getElementById('btn-back').disabled = tab.index <= 0;
+        document.getElementById('btn-forward').disabled = tab.index >= tab.stack.length - 1;
+
+        const input = document.getElementById('omnibox-input');
+        const badge = document.getElementById('status-badge');
+
+        if (currentUrl.startsWith('colt://search')) {
+          const q = new URLSearchParams(currentUrl.split('?')[1] || '').get('q') || '';
+          input.value = q;
+        } else {
+          input.value = currentUrl;
+        }
+
+        badge.textContent = tab.status;
+        badge.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-bold mr-2 flex-shrink-0 border ' + (
+          tab.status === '200 OK'
+            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+            : tab.status === 'SANDBOX'
+            ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+            : 'dev-accent-soft dev-accent-text'
+        );
+
+        const isBookmarked = state.bookmarks.some(b => b.url === currentUrl);
+        const bmIcon = document.getElementById('icon-bookmark');
+        bmIcon.setAttribute('fill', isBookmarked ? 'currentColor' : 'none');
+        document.getElementById('btn-bookmark').classList.toggle('text-amber-400', isBookmarked);
+      }
+
+      function renderBookmarksBar() {
+        const list = document.getElementById('bookmarks-list');
+        list.innerHTML = state.bookmarks.map(bm => `
+          <button data-bm-url="${esc(bm.url)}" class="px-2 py-0.5 rounded hover:bg-white/10 whitespace-nowrap transition">
+            ${esc(bm.title)}
+          </button>
+        `).join('');
+
+        list.querySelectorAll('[data-bm-url]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-bm-url')));
+        });
+      }
+
+      // --- VIEWPORT ROUTER ---
+      function renderViewport(url) {
+        const vp = document.getElementById('viewport');
+        if (url === 'colt://home') {
+          renderDevHome(vp);
+        } else if (url === 'colt://sandbox') {
+          renderSandboxRoute(vp);
+        } else if (url === 'colt://network') {
+          renderNetworkRoute(vp);
+        } else if (url === 'colt://flags') {
+          renderFlagsRoute(vp);
+        } else if (url === 'colt://settings') {
+          renderSettingsRoute(vp);
+        } else if (url.startsWith('colt://search')) {
+          const q = new URLSearchParams(url.split('?')[1] || '').get('q') || '';
+          renderDdgSearch(vp, q);
+        } else {
+          renderWebSandbox(vp, url);
+        }
+        lucide.createIcons();
+      }
+
+      // 1. Developer Home Page (colt://home)
+      function renderDevHome(vp) {
+        const activeFlagsCount = Object.values(state.flags).filter(f => f.enabled).length;
+        const uaSnippet = navigator.userAgent.split(' ').slice(-2).join(' ');
+
+        vp.innerHTML = `
+          <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+            
+            <!-- System Telemetry Strip -->
+            <div class="dev-card border rounded-lg p-3 grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+              <div>
+                <div class="text-[10px] dev-muted uppercase">Viewport Matrix</div>
+                <div class="font-bold dev-accent-text">${window.innerWidth} &times; ${window.innerHeight}px</div>
+              </div>
+              <div>
+                <div class="text-[10px] dev-muted uppercase">Engine / UA</div>
+                <div class="font-bold truncate">${esc(uaSnippet)}</div>
+              </div>
+              <div>
+                <div class="text-[10px] dev-muted uppercase">Storage Footprint</div>
+                <div class="font-bold text-emerald-400">${getLocalStorageKB()} KB (coltbrowser_dev_*)</div>
+              </div>
+              <div>
+                <div class="text-[10px] dev-muted uppercase">Experimental Flags</div>
+                <div class="font-bold text-amber-400">${activeFlagsCount} / ${Object.keys(state.flags).length} Active</div>
+              </div>
+            </div>
+
+            <!-- Hero & DuckDuckGo Dev Search -->
+            <div class="dev-card border rounded-xl p-6 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div class="text-[11px] font-mono dev-accent-text uppercase font-bold">
+                    Built for Muir Middle School (HVS) &bull; Engineered by Henry Green
+                  </div>
+                  <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5">
+                    ColtBrowser <span class="dev-accent-text">DEV</span> <span class="text-xs font-mono font-normal dev-muted">v2.0.0-nightly</span>
+                  </h1>
+                </div>
+                <div class="flex items-center gap-2 font-mono text-xs">
+                  <button data-nav="colt://sandbox" class="px-3 py-1.5 rounded dev-accent-bg font-bold">Open Sandbox</button>
+                  <button id="home-open-dt" class="px-3 py-1.5 rounded border dev-border hover:opacity-80">Toggle DevTools (F12)</button>
+                </div>
+              </div>
+
+              <!-- Search Input with Bang Chips -->
+              <form id="home-ddg-form" class="space-y-2.5">
+                <div class="flex items-center dev-chrome border dev-border focus-within:border-cyan-400 rounded-lg px-3 py-2.5">
+                  <span class="font-mono text-xs font-bold dev-accent-text mr-2.5">ddg://</span>
+                  <input
+                    id="home-ddg-input"
+                    type="text"
+                    placeholder="Query DuckDuckGo API, use !gh / !mdn / !wiki bangs, or enter a URL..."
+                    class="w-full bg-transparent text-sm font-mono focus:outline-none"
+                    autofocus
+                  />
+                  <button type="submit" class="ml-2 px-4 py-1.5 rounded dev-accent-bg text-xs font-mono font-bold flex-shrink-0">
+                    QUERY
+                  </button>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
+                  <span class="dev-muted">Quick Bangs:</span>
+                  <button type="button" data-bang="!gh " class="px-2 py-0.5 rounded dev-chrome border dev-border hover:border-cyan-400">!gh (GitHub)</button>
+                  <button type="button" data-bang="!mdn " class="px-2 py-0.5 rounded dev-chrome border dev-border hover:border-cyan-400">!mdn (MDN Docs)</button>
+                  <button type="button" data-bang="!wiki " class="px-2 py-0.5 rounded dev-chrome border dev-border hover:border-cyan-400">!wiki (Wikipedia)</button>
+                  <button type="button" data-bang="!ddg " class="px-2 py-0.5 rounded dev-chrome border dev-border hover:border-cyan-400">!ddg (DuckDuckGo)</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Quick Launch Dev & School Bookmarks -->
+            <div>
+              <div class="text-xs font-mono font-bold uppercase dev-muted mb-2.5">Quick Launch Endpoints &amp; Internal Routes</div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-xs">
+                ${state.bookmarks.map(bm => `
+                  <button data-nav="${esc(bm.url)}" class="dev-card border rounded-lg p-3 text-left hover:border-cyan-400 transition">
+                    <div class="font-bold truncate">${esc(bm.title)}</div>
+                    <div class="text-[11px] dev-muted truncate mt-0.5">${esc(bm.url)}</div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Mini Utility Widget: JSON Formatter & Base64 Encoder/Decoder -->
+            <div class="dev-card border rounded-xl p-4 space-y-3 font-mono">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="braces" class="w-4 h-4 dev-accent-text"></i>
+                  <span class="text-xs font-bold uppercase">JSON Formatter &amp; Base64 Codec Utility</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 text-[11px]">
+                  <button id="util-json-fmt" class="px-2.5 py-1 rounded dev-accent-bg font-bold">Format JSON</button>
+                  <button id="util-json-min" class="px-2.5 py-1 rounded border dev-border hover:opacity-80">Minify JSON</button>
+                  <button id="util-b64-enc" class="px-2.5 py-1 rounded border dev-border hover:opacity-80">Base64 Encode</button>
+                  <button id="util-b64-dec" class="px-2.5 py-1 rounded border dev-border hover:opacity-80">Base64 Decode</button>
+                </div>
+              </div>
+              <textarea
+                id="util-codec-input"
+                rows="4"
+                placeholder='Paste raw JSON e.g. {"school":"Muir Middle School","district":"HVS","dev":"Henry Green"} or text for Base64...'
+                class="w-full dev-chrome border dev-border rounded-lg p-2.5 text-xs focus:outline-none focus:border-cyan-400 resize-y"
+              >{"browser":"ColtBrowser DEV","version":"v2.0.0-nightly","author":"Henry Green","school":"Muir Middle School (HVS)"}</textarea>
+            </div>
+
+            <!-- Footer Credits -->
+            <footer class="border-t dev-border pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-[11px] dev-muted">
+              <span>Copyright &copy; 2026 Henry Green &bull; Apache License 2.0</span>
+              <span>Built for Muir Middle School (Huron Valley Schools)</span>
+            </footer>
+
+          </div>
+        `;
+
+        // Bind Home Events
+        document.getElementById('home-ddg-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = document.getElementById('home-ddg-input').value;
+          if (val.trim()) navigateActive(val);
+        });
+
+        vp.querySelectorAll('[data-bang]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const inp = document.getElementById('home-ddg-input');
+            inp.value = btn.getAttribute('data-bang');
+            inp.focus();
+          });
+        });
+
+        vp.querySelectorAll('[data-nav]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-nav')));
+        });
+
+        document.getElementById('home-open-dt').addEventListener('click', () => toggleDevTools());
+
+        // Codec Widget Logic
+        const codecBox = document.getElementById('util-codec-input');
+        document.getElementById('util-json-fmt').addEventListener('click', () => {
+          try {
+            codecBox.value = JSON.stringify(JSON.parse(codecBox.value), null, 2);
+            showToast('[OK] JSON formatted');
+          } catch (err) {
+            showToast('[ERR] Invalid JSON: ' + err.message);
+          }
+        });
+        document.getElementById('util-json-min').addEventListener('click', () => {
+          try {
+            codecBox.value = JSON.stringify(JSON.parse(codecBox.value));
+            showToast('[OK] JSON minified');
+          } catch (err) {
+            showToast('[ERR] Invalid JSON');
+          }
+        });
+        document.getElementById('util-b64-enc').addEventListener('click', () => {
+          try {
+            codecBox.value = btoa(unescape(encodeURIComponent(codecBox.value)));
+            showToast('[OK] Encoded to Base64');
+          } catch (err) {
+            showToast('[ERR] Base64 encode failed');
+          }
+        });
+        document.getElementById('util-b64-dec').addEventListener('click', () => {
+          try {
+            codecBox.value = decodeURIComponent(escape(atob(codecBox.value.trim())));
+            showToast('[OK] Decoded from Base64');
+          } catch (err) {
+            showToast('[ERR] Invalid Base64 string');
+          }
+        });
+      }
+
+      // 2. Live HTML/CSS/JS Sandbox Route (colt://sandbox)
+      function buildSandboxDocument() {
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>${state.sandbox.css}</style>
+</head>
+<body>
+${state.sandbox.html}
+<script>
+try {
+${state.sandbox.js}
+} catch (err) {
+  document.body.insertAdjacentHTML('beforeend', '<pre style="color:#f43f5e;background:#1f1118;padding:10px;border-radius:6px;font-family:monospace;">Runtime Error: ' + err.message + '</pre>');
+}
+<\/script>
+</body>
+</html>`;
+      }
+
+      function exportSandboxHtml() {
+        const blob = new Blob([buildSandboxDocument()], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'coltbrowser-sandbox-project.html';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('[OK] Exported coltbrowser-sandbox-project.html');
+        logConsole('INFO', 'Exported standalone HTML bundle from colt://sandbox');
+      }
+
+      function renderSandboxRoute(vp) {
+        vp.innerHTML = `
+          <div class="h-full flex flex-col font-mono">
+            <!-- Sandbox Toolbar -->
+            <div class="dev-toolbar border-b px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-bold dev-accent-text">colt://sandbox</span>
+                <span class="dev-muted hidden sm:inline">Live HTML / CSS / JS Playground</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <select id="sb-template-select" class="dev-chrome border dev-border rounded px-2 py-1 text-xs focus:outline-none">
+                  <option value="">Load Starter Template...</option>
+                  <option value="muirCard">Muir Colts Student Card</option>
+                  <option value="jsCalc">JS Quick Calculator</option>
+                  <option value="cssPulse">Cyber Radar Animation</option>
+                </select>
+                <button id="sb-run-btn" class="px-3 py-1 rounded dev-accent-bg font-bold">Run &#9654;</button>
+                <button id="sb-export-btn" class="px-3 py-1 rounded border dev-border hover:opacity-80">Export .html</button>
+              </div>
+            </div>
+
+            <!-- Split Code Editors + Live Preview -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+              <!-- Editors Column -->
+              <div class="flex flex-col border-r dev-border overflow-y-auto divide-y dev-border">
+                <div class="flex-1 flex flex-col p-2">
+                  <label class="text-[10px] font-bold text-amber-400 uppercase mb-1">HTML</label>
+                  <textarea id="sb-html" class="flex-1 w-full dev-chrome border dev-border rounded p-2 text-xs focus:outline-none resize-none">${esc(state.sandbox.html)}</textarea>
+                </div>
+                <div class="flex-1 flex flex-col p-2">
+                  <label class="text-[10px] font-bold text-cyan-400 uppercase mb-1">CSS</label>
+                  <textarea id="sb-css" class="flex-1 w-full dev-chrome border dev-border rounded p-2 text-xs focus:outline-none resize-none">${esc(state.sandbox.css)}</textarea>
+                </div>
+                <div class="flex-1 flex flex-col p-2">
+                  <label class="text-[10px] font-bold text-emerald-400 uppercase mb-1">JavaScript</label>
+                  <textarea id="sb-js" class="flex-1 w-full dev-chrome border dev-border rounded p-2 text-xs focus:outline-none resize-none">${esc(state.sandbox.js)}</textarea>
+                </div>
+              </div>
+
+              <!-- Live Preview Column -->
+              <div class="flex flex-col bg-white h-full">
+                <div class="dev-chrome border-b px-3 py-1 text-[10px] dev-muted flex justify-between">
+                  <span>LIVE SANDBOX OUTPUT</span>
+                  <span>sandbox="allow-scripts"</span>
+                </div>
+                <iframe id="sb-preview-frame" sandbox="allow-scripts" class="flex-1 w-full h-full border-0 bg-white"></iframe>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const htmlEl = document.getElementById('sb-html');
+        const cssEl = document.getElementById('sb-css');
+        const jsEl = document.getElementById('sb-js');
+        const frame = document.getElementById('sb-preview-frame');
+
+        function runPreview() {
+          state.sandbox.html = htmlEl.value;
+          state.sandbox.css = cssEl.value;
+          state.sandbox.js = jsEl.value;
+          save('sandbox', state.sandbox);
+          frame.srcdoc = buildSandboxDocument();
+        }
+
+        runPreview();
+
+        [htmlEl, cssEl, jsEl].forEach(el => {
+          el.addEventListener('input', runPreview);
+        });
+
+        document.getElementById('sb-run-btn').addEventListener('click', () => {
+          runPreview();
+          showToast('[OK] Sandbox executed');
+        });
+
+        document.getElementById('sb-export-btn').addEventListener('click', exportSandboxHtml);
+
+        document.getElementById('sb-template-select').addEventListener('change', (e) => {
+          const tpl = SANDBOX_TEMPLATES[e.target.value];
+          if (!tpl) return;
+          htmlEl.value = tpl.html;
+          cssEl.value = tpl.css;
+          jsEl.value = tpl.js;
+          runPreview();
+          showToast(`Loaded template: ${tpl.name}`);
+        });
+      }
+
+      // 3. Network & Storage Route (colt://network)
+      function renderNetworkRoute(vp) {
+        const lsKeys = Object.keys(localStorage).filter(k => k.startsWith(PREFIX));
+
+        vp.innerHTML = `
+          <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 font-mono text-xs">
+            <div class="flex items-center justify-between border-b dev-border pb-3">
+              <div>
+                <h1 class="text-lg font-bold dev-accent-text">colt://network &amp; Storage Inspector</h1>
+                <p class="dev-muted text-[11px]">Real-time telemetry for DuckDuckGo API fetches, iframe navigations, and localStorage state.</p>
+              </div>
+              <button id="net-clear-btn" class="px-3 py-1.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold">
+                Clear Network Log
+              </button>
+            </div>
+
+            <!-- Network Log Table -->
+            <div class="dev-card border rounded-xl overflow-hidden">
+              <div class="dev-toolbar px-3 py-2 border-b dev-border font-bold">HTTP / Navigation Requests (${state.networkLogs.length})</div>
+              <div class="divide-y dev-border max-h-64 overflow-y-auto">
+                ${state.networkLogs.length === 0
+                  ? `<div class="p-4 dev-muted">No network requests logged yet. Perform a DuckDuckGo search or visit a site.</div>`
+                  : state.networkLogs.map(req => `
+                    <div class="px-3 py-2 flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-2 overflow-hidden">
+                        <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold">${esc(req.status)}</span>
+                        <span class="dev-accent-text font-bold">${esc(req.method)}</span>
+                        <span class="truncate">${esc(req.url)}</span>
+                      </div>
+                      <span class="dev-muted flex-shrink-0">${req.durationMs}ms &bull; ${req.time}</span>
+                    </div>
+                  `).join('')
+                }
+              </div>
+            </div>
+
+            <!-- LocalStorage Inspector -->
+            <div class="dev-card border rounded-xl overflow-hidden">
+              <div class="dev-toolbar px-3 py-2 border-b dev-border flex items-center justify-between">
+                <span class="font-bold">localStorage (${lsKeys.length} keys &bull; ${getLocalStorageKB()} KB)</span>
+                <button id="ls-purge-btn" class="text-rose-400 hover:underline font-bold">Reset All Storage</button>
+              </div>
+              <div class="divide-y dev-border">
+                ${lsKeys.map(k => `
+                  <div class="p-3 space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold dev-accent-text">${esc(k)}</span>
+                      <button data-del-ls="${esc(k)}" class="text-rose-400 hover:underline">Delete Key</button>
+                    </div>
+                    <pre class="dev-chrome border dev-border rounded p-2 text-[11px] overflow-x-auto max-h-24">${esc(localStorage.getItem(k))}</pre>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('net-clear-btn').addEventListener('click', () => {
+          state.networkLogs = [];
+          renderNetworkRoute(vp);
+        });
+
+        document.getElementById('ls-purge-btn').addEventListener('click', () => {
+          lsKeys.forEach(k => localStorage.removeItem(k));
+          showToast('Purged coltbrowser_dev_* keys');
+          renderNetworkRoute(vp);
+        });
+
+        vp.querySelectorAll('[data-del-ls]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            localStorage.removeItem(btn.getAttribute('data-del-ls'));
+            renderNetworkRoute(vp);
+          });
+        });
+      }
+
+      // 4. Experimental Feature Flags Route (colt://flags)
+      function renderFlagsRoute(vp) {
+        vp.innerHTML = `
+          <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5 font-mono text-xs">
+            <div class="border-b dev-border pb-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-5 h-5 text-amber-400"></i>
+                <h1 class="text-lg font-bold">colt://flags — Experimental Runtime Features</h1>
+              </div>
+              <p class="dev-muted text-[11px] mt-1">Toggle experimental ColtBrowser DEV v2.0.0-nightly capabilities in real time.</p>
+            </div>
+
+            <div class="space-y-3">
+              ${Object.entries(state.flags).map(([key, flag]) => `
+                <div class="dev-card border rounded-xl p-4 flex items-center justify-between gap-4">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm">${esc(flag.name)}</span>
+                      <span class="px-1.5 py-0.5 rounded dev-chrome border dev-border text-[10px] dev-muted">#${esc(key)}</span>
+                    </div>
+                    <p class="dev-muted text-xs mt-1">${esc(flag.desc)}</p>
+                  </div>
+                  <button data-toggle-flag="${esc(key)}" class="px-3.5 py-1.5 rounded font-bold flex-shrink-0 transition ${
+                    flag.enabled
+                      ? 'dev-accent-bg'
+                      : 'dev-chrome border dev-border dev-muted'
+                  }">
+                    ${flag.enabled ? 'ENABLED' : 'DISABLED'}
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        vp.querySelectorAll('[data-toggle-flag]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const k = btn.getAttribute('data-toggle-flag');
+            state.flags[k].enabled = !state.flags[k].enabled;
+            save('flags', state.flags);
+            applyFeatureFlags();
+            renderFlagsRoute(vp);
+            lucide.createIcons();
+            logConsole('INFO', `Flag #${k} set to ${state.flags[k].enabled}`);
+          });
+        });
+      }
+
+      // 5. Settings Route (colt://settings)
+      function renderSettingsRoute(vp) {
+        vp.innerHTML = `
+          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5 font-mono text-xs">
+            <div class="border-b dev-border pb-3">
+              <h1 class="text-lg font-bold dev-accent-text">colt://settings — Developer Configuration</h1>
+              <p class="dev-muted text-[11px]">Configure IDE themes, DevTools docking, and reset browser data.</p>
+            </div>
+
+            <div class="dev-card border rounded-xl p-4 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold">IDE Color Theme</div>
+                  <div class="dev-muted text-[11px]">Switch between Cyber Dark, Muir Colts Dev, and Solarized Light</div>
+                </div>
+                <select id="settings-theme-sel" class="dev-chrome border dev-border rounded px-3 py-1.5">
+                  <option value="cyber" ${state.theme === 'cyber' ? 'selected' : ''}>Cyber Dark</option>
+                  <option value="muir-dev" ${state.theme === 'muir-dev' ? 'selected' : ''}>Muir Colts Dev Navy &amp; Gold</option>
+                  <option value="solarized" ${state.theme === 'solarized' ? 'selected' : ''}>Solarized Light</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between border-t dev-border pt-4">
+                <div>
+                  <div class="font-bold">Default DevTools Dock Position</div>
+                  <div class="dev-muted text-[11px]">Dock DevTools pane to the bottom or right side</div>
+                </div>
+                <button id="settings-dock-btn" class="px-3 py-1.5 rounded border dev-border font-bold">
+                  Current: ${state.devtoolsDock.toUpperCase()}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('settings-theme-sel').addEventListener('change', (e) => {
+          state.theme = e.target.value;
+          save('theme', state.theme);
+          applyTheme();
+        });
+
+        document.getElementById('settings-dock-btn').addEventListener('click', () => {
+          toggleDevToolsDock();
+          renderSettingsRoute(vp);
+        });
+      }
+
+      // 6. DuckDuckGo Instant Answer Search with Raw JSON Toggle
+      async function renderDdgSearch(vp, query) {
+        const externalUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+        const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+
+        vp.innerHTML = `
+          <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b dev-border pb-3 font-mono">
+              <div>
+                <h2 class="text-sm sm:text-base font-bold">DuckDuckGo API Query: "<span class="dev-accent-text">${esc(query)}</span>"</h2>
+                <p class="text-[11px] dev-muted">Endpoint: api.duckduckgo.com &bull; Zero tracking</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <button id="btn-toggle-raw-json" class="px-3 py-1.5 rounded border dev-border hover:opacity-80 font-bold">
+                  ${state.showRawDdgJson ? 'Rendered View' : 'Inspect Raw JSON'}
+                </button>
+                <a href="${externalUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded dev-accent-bg font-bold">
+                  DuckDuckGo.com &nearr;
+                </a>
+              </div>
+            </div>
+
+            <div id="ddg-results-container" class="space-y-3">
+              <div class="font-mono text-xs dev-muted">Fetching JSON payload from DuckDuckGo...</div>
+            </div>
+          </div>
+        `;
+
+        const container = document.getElementById('ddg-results-container');
+        const t0 = performance.now();
+
+        try {
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+          const elapsed = Math.round(performance.now() - t0);
+          logNetwork('GET', apiUrl, `${res.status} OK`, elapsed, 'fetch/json');
+
+          function paintDdg() {
+            if (state.showRawDdgJson) {
+              const formatted = state.flags.jsonPretty.enabled
+                ? JSON.stringify(data, null, 2)
+                : JSON.stringify(data);
+              container.innerHTML = `
+                <pre class="dev-card border rounded-xl p-4 font-mono text-xs text-emerald-400 overflow-x-auto max-h-[65vh]">${esc(formatted)}</pre>
+              `;
+              return;
+            }
+
+            let html = '';
+            if (data.AbstractText) {
+              html += `
+                <div class="dev-card border rounded-xl p-4 space-y-2">
+                  <div class="text-[11px] font-mono font-bold dev-accent-text uppercase">
+                    Instant Answer &bull; ${esc(data.AbstractSource || 'DuckDuckGo')}
+                  </div>
+                  <h3 class="text-base font-bold">${esc(data.Heading || query)}</h3>
+                  <p class="text-xs sm:text-sm dev-muted leading-relaxed">${esc(data.AbstractText)}</p>
+                  ${data.AbstractURL ? `
+                    <button data-visit="${esc(data.AbstractURL)}" class="ddg-nav text-xs font-mono font-bold dev-accent-text hover:underline">
+                      Open Source in Sandbox &rarr;
+                    </button>
+                  ` : ''}
+                </div>
+              `;
+            }
+
+            if (data.Answer) {
+              html += `
+                <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 font-mono text-xs text-emerald-400">
+                  ${esc(data.Answer)}
+                </div>
+              `;
+            }
+
+            const topics = [];
+            if (Array.isArray(data.RelatedTopics)) {
+              data.RelatedTopics.forEach(item => {
+                if (item.Text && item.FirstURL) topics.push(item);
+                else if (Array.isArray(item.Topics)) {
+                  item.Topics.forEach(sub => { if (sub.Text && sub.FirstURL) topics.push(sub); });
+                }
+              });
+            }
+
+            if (topics.length > 0) {
+              html += topics.slice(0, 8).map(t => {
+                const parts = t.Text.split(' - ');
+                return `
+                  <div class="dev-card border rounded-lg p-3.5">
+                    <div class="text-[11px] font-mono text-emerald-400 truncate">${esc(t.FirstURL)}</div>
+                    <button data-visit="${esc(t.FirstURL)}" class="ddg-nav text-left text-sm font-bold dev-accent-text hover:underline my-0.5 block">
+                      ${esc(parts[0] || t.Text)}
+                    </button>
+                    <p class="text-xs dev-muted">${esc(parts.slice(1).join(' - ') || t.Text)}</p>
+                  </div>
+                `;
+              }).join('');
+            }
+
+            if (!html) {
+              html = `
+                <div class="dev-card border rounded-xl p-5 font-mono text-xs space-y-2">
+                  <p>No instant summary returned for <strong>"${esc(query)}"</strong>.</p>
+                  <a href="${externalUrl}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded dev-accent-bg font-bold">
+                    Launch Full DuckDuckGo Web Search &nearr;
+                  </a>
+                </div>
+              `;
+            }
+
+            container.innerHTML = html;
+            container.querySelectorAll('.ddg-nav').forEach(b => {
+              b.addEventListener('click', () => navigateActive(b.getAttribute('data-visit')));
+            });
+          }
+
+          paintDdg();
+
+          document.getElementById('btn-toggle-raw-json').addEventListener('click', (e) => {
+            state.showRawDdgJson = !state.showRawDdgJson;
+            e.target.textContent = state.showRawDdgJson ? 'Rendered View' : 'Inspect Raw JSON';
+            paintDdg();
+          });
+        } catch (err) {
+          logNetwork('GET', apiUrl, 'ERR', Math.round(performance.now() - t0), 'fetch/json');
+          container.innerHTML = `
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 font-mono text-xs text-rose-400 space-y-2">
+              <p>Network error reaching DuckDuckGo API (${esc(err.message)}).</p>
+              <a href="${externalUrl}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded dev-accent-bg font-bold">
+                Open on DuckDuckGo.com &nearr;
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      // 7. Smart Iframe Viewport with Sandbox Attribute Inspector
+      function renderWebSandbox(vp, url) {
+        const activeSandboxTokens = Object.entries(state.iframeSandboxFlags)
+          .filter(([, enabled]) => enabled)
+          .map(([token]) => token)
+          .join(' ');
+
+        vp.innerHTML = `
+          <div class="h-full w-full flex flex-col">
+            <!-- Diagnostic & Sandbox Control Bar -->
+            <div class="dev-chrome border-b px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold">SANDBOX</span>
+                <span class="truncate dev-muted">${esc(url)}</span>
+              </div>
+
+              <!-- Interactive Sandbox Flags -->
+              <div class="flex flex-wrap items-center gap-2">
+                ${Object.keys(state.iframeSandboxFlags).map(tok => `
+                  <label class="inline-flex items-center gap-1 cursor-pointer">
+                    <input type="checkbox" data-sb-tok="${tok}" ${state.iframeSandboxFlags[tok] ? 'checked' : ''} class="accent-cyan-400" />
+                    <span>${tok}</span>
+                  </label>
+                `).join('')}
+                <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-0.5 rounded dev-accent-bg font-bold">
+                  External &nearr;
+                </a>
+              </div>
+            </div>
+
+            <iframe
+              id="web-sandbox-iframe"
+              src="${esc(url)}"
+              sandbox="${esc(activeSandboxTokens)}"
+              referrerpolicy="no-referrer"
+              class="flex-1 w-full h-full border-0 bg-white"
+              title="ColtBrowser DEV Sandboxed Viewport"
+            ></iframe>
+          </div>
+        `;
+
+        vp.querySelectorAll('[data-sb-tok]').forEach(cb => {
+          cb.addEventListener('change', () => {
+            const tok = cb.getAttribute('data-sb-tok');
+            state.iframeSandboxFlags[tok] = cb.checked;
+            logConsole('WARN', `Updated iframe sandbox attribute: ${tok}=${cb.checked}`);
+            renderWebSandbox(vp, url);
+          });
+        });
+      }
+
+      // --- BUILT-IN DEVTOOLS PANEL (F12) ---
+      function toggleDevTools(force) {
+        state.devtoolsOpen = typeof force === 'boolean' ? force : !state.devtoolsOpen;
+        const panel = document.getElementById('devtools-panel');
+        panel.classList.toggle('hidden', !state.devtoolsOpen);
+        panel.classList.toggle('flex', state.devtoolsOpen);
+        applyDevToolsDock();
+        if (state.devtoolsOpen) renderDevToolsBody();
+      }
+
+      function toggleDevToolsDock() {
+        state.devtoolsDock = state.devtoolsDock === 'bottom' ? 'right' : 'bottom';
+        save('devtoolsDock', state.devtoolsDock);
+        applyDevToolsDock();
+      }
+
+      function applyDevToolsDock() {
+        const ws = document.getElementById('workspace-main');
+        const panel = document.getElementById('devtools-panel');
+        document.getElementById('dt-dock-label').textContent = state.devtoolsDock === 'bottom' ? 'Bottom' : 'Right';
+
+        if (state.devtoolsDock === 'right') {
+          ws.classList.remove('flex-col');
+          ws.classList.add('flex-row');
+          panel.classList.remove('border-t');
+          panel.classList.add('border-l');
+          panel.style.height = '100%';
+          panel.style.width = '45%';
+          panel.style.minWidth = '300px';
+        } else {
+          ws.classList.remove('flex-row');
+          ws.classList.add('flex-col');
+          panel.classList.remove('border-l');
+          panel.classList.add('border-t');
+          panel.style.width = '100%';
+          panel.style.height = '44%';
+          panel.style.minHeight = '220px';
+        }
+      }
+
+      function renderDevToolsBody() {
+        // Highlight active DevTools tab button
+        document.querySelectorAll('.dt-tab-btn').forEach(btn => {
+          const isMatch = btn.getAttribute('data-dt-tab') === state.devtoolsTab;
+          btn.className = 'dt-tab-btn px-2.5 py-1 rounded ' + (
+            isMatch ? 'font-bold dev-accent-soft dev-accent-text border' : 'dev-muted hover:opacity-90'
+          );
+        });
+
+        const body = document.getElementById('devtools-body');
+
+        if (state.devtoolsTab === 'console') {
+          body.innerHTML = `
+            <div class="flex-1 overflow-y-auto p-2.5 font-mono text-xs space-y-1" id="dt-console-output">
+              <div class="dev-muted text-[11px] pb-1 border-b dev-border">
+                ColtBrowser DEV Interactive JS REPL &bull; Try typing: <code class="dev-accent-text">colt.tabs()</code>, <code class="dev-accent-text">colt.flags()</code>, or <code class="dev-accent-text">2 + 2</code>
+              </div>
+              ${state.consoleLogs.map(log => {
+                const color = log.level === 'ERR' ? 'text-rose-400'
+                  : log.level === 'WARN' ? 'text-amber-400'
+                  : log.level === 'NET' ? 'text-emerald-400'
+                  : log.level === 'EVAL' ? 'dev-accent-text'
+                  : 'dev-muted';
+                return `
+                  <div class="flex items-start gap-2 leading-relaxed">
+                    <span class="opacity-50 flex-shrink-0">[${log.time}]</span>
+                    <span class="${color} font-bold flex-shrink-0">[${log.level}]</span>
+                    <span class="break-all">${esc(log.message)}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <form id="dt-console-form" class="dev-toolbar border-t px-2.5 py-1.5 flex items-center gap-2 font-mono text-xs">
+              <span class="dev-accent-text font-bold">&gt;</span>
+              <input id="dt-console-input" type="text" autocomplete="off" placeholder="Evaluate JavaScript expression..." class="flex-1 bg-transparent focus:outline-none" />
+              <button type="button" id="dt-console-clear" class="px-2 py-0.5 rounded border dev-border text-[11px] dev-muted hover:opacity-80">Clear</button>
+            </form>
+          `;
+
+          const out = document.getElementById('dt-console-output');
+          out.scrollTop = out.scrollHeight;
+
+          document.getElementById('dt-console-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inp = document.getElementById('dt-console-input');
+            const code = inp.value.trim();
+            if (!code) return;
+            logConsole('EVAL', '> ' + code);
+            try {
+              const result = (0, eval)(code);
+              const formatted = typeof result === 'object' ? JSON.stringify(result) : String(result);
+              logConsole('INFO', '< ' + formatted);
+            } catch (err) {
+              logConsole('ERR', err.toString());
+            }
+            inp.value = '';
+          });
+
+          document.getElementById('dt-console-clear').addEventListener('click', () => {
+            state.consoleLogs = [];
+            renderDevToolsBody();
+          });
+        } else if (state.devtoolsTab === 'sandbox') {
+          body.innerHTML = `
+            <div class="h-full grid grid-cols-1 md:grid-cols-2 font-mono text-xs overflow-hidden">
+              <div class="p-2.5 flex flex-col gap-2 border-r dev-border overflow-y-auto">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold dev-accent-text">Quick Sandbox Drawer</span>
+                  <div class="flex gap-1.5">
+                    <button id="dt-sb-full" class="px-2 py-0.5 rounded border dev-border text-[11px]">Open Full colt://sandbox</button>
+                    <button id="dt-sb-export" class="px-2 py-0.5 rounded dev-accent-bg text-[11px] font-bold">Export .html</button>
+                  </div>
+                </div>
+                <textarea id="dt-sb-html" rows="3" placeholder="HTML..." class="dev-chrome border dev-border rounded p-1.5 text-[11px]">${esc(state.sandbox.html)}</textarea>
+                <textarea id="dt-sb-css" rows="2" placeholder="CSS..." class="dev-chrome border dev-border rounded p-1.5 text-[11px]">${esc(state.sandbox.css)}</textarea>
+                <textarea id="dt-sb-js" rows="2" placeholder="JS..." class="dev-chrome border dev-border rounded p-1.5 text-[11px]">${esc(state.sandbox.js)}</textarea>
+              </div>
+              <iframe id="dt-sb-frame" sandbox="allow-scripts" class="w-full h-full border-0 bg-white"></iframe>
+            </div>
+          `;
+
+          const h = document.getElementById('dt-sb-html');
+          const c = document.getElementById('dt-sb-css');
+          const j = document.getElementById('dt-sb-js');
+          const f = document.getElementById('dt-sb-frame');
+
+          function syncDtSandbox() {
+            state.sandbox.html = h.value;
+            state.sandbox.css = c.value;
+            state.sandbox.js = j.value;
+            save('sandbox', state.sandbox);
+            f.srcdoc = buildSandboxDocument();
+          }
+          syncDtSandbox();
+          [h, c, j].forEach(el => el.addEventListener('input', syncDtSandbox));
+          document.getElementById('dt-sb-full').addEventListener('click', () => navigateActive('colt://sandbox'));
+          document.getElementById('dt-sb-export').addEventListener('click', exportSandboxHtml);
+        } else if (state.devtoolsTab === 'network') {
+          body.innerHTML = `
+            <div class="h-full overflow-y-auto p-2.5 font-mono text-xs space-y-1.5">
+              <div class="flex items-center justify-between border-b dev-border pb-1.5">
+                <span class="font-bold">Network &amp; Storage Telemetry (${state.networkLogs.length} reqs &bull; ${getLocalStorageKB()} KB LS)</span>
+                <button id="dt-net-full" class="px-2 py-0.5 rounded dev-accent-bg text-[11px] font-bold">Open Full colt://network</button>
+              </div>
+              ${state.networkLogs.map(r => `
+                <div class="flex items-center justify-between gap-2 py-1 border-b dev-border/50">
+                  <span class="truncate"><strong class="text-emerald-400">[${esc(r.status)}]</strong> ${esc(r.method)} ${esc(r.url)}</span>
+                  <span class="dev-muted flex-shrink-0">${r.durationMs}ms</span>
+                </div>
+              `).join('') || '<div class="dev-muted py-4">No requests logged yet.</div>'}
+            </div>
+          `;
+          document.getElementById('dt-net-full').addEventListener('click', () => navigateActive('colt://network'));
+        } else if (state.devtoolsTab === 'flags') {
+          body.innerHTML = `
+            <div class="h-full overflow-y-auto p-2.5 font-mono text-xs space-y-2">
+              <div class="flex items-center justify-between border-b dev-border pb-1.5">
+                <span class="font-bold text-amber-400">Quick Runtime Feature Flags</span>
+                <button id="dt-flags-full" class="px-2 py-0.5 rounded border dev-border text-[11px]">Open colt://flags</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                ${Object.entries(state.flags).map(([k, f]) => `
+                  <button data-dt-flag="${k}" class="p-2 rounded border dev-border flex items-center justify-between text-left hover:border-cyan-400">
+                    <span class="truncate pr-2">${esc(f.name)}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${f.enabled ? 'dev-accent-bg' : 'dev-chrome dev-muted'}">
+                      ${f.enabled ? 'ON' : 'OFF'}
+                    </span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          document.getElementById('dt-flags-full').addEventListener('click', () => navigateActive('colt://flags'));
+          body.querySelectorAll('[data-dt-flag]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const k = btn.getAttribute('data-dt-flag');
+              state.flags[k].enabled = !state.flags[k].enabled;
+              save('flags', state.flags);
+              applyFeatureFlags();
+              renderDevToolsBody();
+            });
+          });
+        }
+      }
+
+      // --- History Drawer ---
+      function toggleHistoryDrawer(force) {
+        const drawer = document.getElementById('history-drawer');
+        const open = typeof force === 'boolean' ? force : drawer.classList.contains('hidden');
+        drawer.classList.toggle('hidden', !open);
+        drawer.classList.toggle('flex', open);
+        if (open) {
+          const list = document.getElementById('history-list');
+          document.getElementById('history-footer-count').textContent = `${state.history.length} entries`;
+          list.innerHTML = state.history.map(h => `
+            <button data-h-url="${esc(h.url)}" class="w-full p-2 rounded border dev-border hover:border-cyan-400 text-left block">
+              <div class="flex justify-between text-[10px] dev-muted">
+                <span>${esc(h.status)}</span>
+                <span>${esc(h.time)}</span>
+              </div>
+              <div class="font-bold truncate mt-0.5">${esc(h.title)}</div>
+              <div class="text-[11px] dev-muted truncate">${esc(h.url)}</div>
+            </button>
+          `).join('') || '<div class="dev-muted text-center py-6">No history recorded.</div>';
+
+          list.querySelectorAll('[data-h-url]').forEach(b => {
+            b.addEventListener('click', () => {
+              navigateActive(b.getAttribute('data-h-url'));
+              toggleHistoryDrawer(false);
+            });
+          });
+        }
+      }
+
+      // --- Toggle Bookmark ---
+      function toggleBookmark() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const url = tab.stack[tab.index] || 'colt://home';
+        const idx = state.bookmarks.findIndex(b => b.url === url);
+        if (idx !== -1) {
+          state.bookmarks.splice(idx, 1);
+          showToast('[OK] Removed bookmark');
+        } else {
+          state.bookmarks.push({ title: tab.title, url });
+          showToast('[OK] Added bookmark');
+        }
+        save('bookmarks', state.bookmarks);
+        renderBookmarksBar();
+        updateToolbar(tab, url);
+      }
+
+      // --- Escape Helper ---
+      function esc(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // --- Event Listeners & Keyboard Shortcuts ---
+      function bindEvents() {
+        document.getElementById('btn-new-tab').addEventListener('click', () => createTab('colt://home'));
+        document.getElementById('btn-back').addEventListener('click', goBack);
+        document.getElementById('btn-forward').addEventListener('click', goForward);
+        document.getElementById('btn-reload').addEventListener('click', reloadTab);
+        document.getElementById('btn-home').addEventListener('click', () => navigateActive('colt://home'));
+        document.getElementById('btn-bookmark').addEventListener('click', toggleBookmark);
+
+        document.getElementById('theme-switcher').addEventListener('change', (e) => {
+          state.theme = e.target.value;
+          save('theme', state.theme);
+          applyTheme();
+          logConsole('INFO', `Theme switched to ${state.theme}`);
+        });
+
+        const omniboxForm = document.getElementById('omnibox-form');
+        const omniboxInput = document.getElementById('omnibox-input');
+        omniboxForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          navigateActive(omniboxInput.value);
+          omniboxInput.blur();
+        });
+        omniboxInput.addEventListener('focus', () => omniboxInput.select());
+
+        document.getElementById('btn-route-sandbox').addEventListener('click', () => navigateActive('colt://sandbox'));
+        document.getElementById('btn-route-flags').addEventListener('click', () => navigateActive('colt://flags'));
+        document.getElementById('btn-devtools').addEventListener('click', () => toggleDevTools());
+        document.getElementById('btn-dt-close').addEventListener('click', () => toggleDevTools(false));
+        document.getElementById('btn-dt-dock').addEventListener('click', toggleDevToolsDock);
+
+        document.querySelectorAll('.dt-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.devtoolsTab = btn.getAttribute('data-dt-tab');
+            renderDevToolsBody();
+          });
+        });
+
+        // History Drawer
+        document.getElementById('btn-history-drawer').addEventListener('click', () => toggleHistoryDrawer());
+        document.getElementById('btn-close-history').addEventListener('click', () => toggleHistoryDrawer(false));
+        document.getElementById('btn-clear-history').addEventListener('click', () => {
+          state.history = [];
+          save('history', state.history);
+          document.getElementById('hist-count').textContent = '0';
+          toggleHistoryDrawer(false);
+          showToast('[OK] History purged');
+        });
+
+        // About Modal
+        const aboutModal = document.getElementById('about-modal');
+        document.getElementById('btn-about').addEventListener('click', () => {
+          aboutModal.classList.remove('hidden');
+          aboutModal.classList.add('flex');
+        });
+        [document.getElementById('btn-close-about'), document.getElementById('btn-about-ok')].forEach(b => {
+          b.addEventListener('click', () => {
+            aboutModal.classList.add('hidden');
+            aboutModal.classList.remove('flex');
+          });
+        });
+
+        // Global Shortcuts (F12 DevTools & Vim Keybindings Flag)
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'F12') {
+            e.preventDefault();
+            toggleDevTools();
+            return;
+          }
+          if (!state.flags.vimKeys.enabled) return;
+          const activeTag = document.activeElement?.tagName;
+          const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT';
+
+          if (!isTyping && e.key === '/') {
+            e.preventDefault();
+            omniboxInput.focus();
+          } else if (e.altKey && e.key.toLowerCase() === 'h') {
+            e.preventDefault();
+            goBack();
+          } else if (e.altKey && e.key.toLowerCase() === 'l') {
+            e.preventDefault();
+            goForward();
+          } else if (e.altKey && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            const idx = state.tabs.findIndex(t => t.id === state.activeTabId);
+            switchTab(state.tabs[(idx + 1) % state.tabs.length].id);
+          } else if (e.altKey && e.key.toLowerCase() === 'j') {
+            e.preventDefault();
+            const idx = state.tabs.findIndex(t => t.id === state.activeTabId);
+            switchTab(state.tabs[(idx - 1 + state.tabs.length) % state.tabs.length].id);
+          }
+        });
+      }
+
+      // --- Boot ---
+      initStorage();
+      applyTheme();
+      applyFeatureFlags();
+      bindEvents();
+      renderBookmarksBar();
+      startTelemetryLoop();
+      logConsole('INFO', 'ColtBrowser DEV v2.0.0-nightly initialized by Henry Green for Muir Middle School (HVS)');
+      createTab('colt://home');
+      lucide.createIcons();
+    })();
+  </script>
+</body>
+</html>
