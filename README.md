@@ -1,6 +1,6 @@
-# ColtApps
+# ColtBrowser
 
-A suite of lightweight, browser-based web utilities and tools **built for Muir Middle School (HVS)** by **Henry Green**.
+A browser **built for Muir Middle School (HVS)** by **Henry Green**, which is a part of the ColtApps business.
 
 ---
 
