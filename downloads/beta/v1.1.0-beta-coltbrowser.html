@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColtBrowser v1.1.0 BETA — Built for Muir Middle School</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--ui-font, "Inter")', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            serif: ['"Lora"', 'Georgia', 'serif'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+      --accent-soft: rgba(249, 115, 22, 0.14);
+      --accent-border: rgba(249, 115, 22, 0.35);
+      --ui-font: 'Inter', system-ui, sans-serif;
+    }
+
+    /* Theme Overrides */
+    html.theme-muir-colts {
+      --bg-chrome: #0b192c;
+      --bg-toolbar: #10233e;
+      --bg-viewport: #071120;
+      --bg-card: #112644;
+      --border-subtle: #1e3a5f;
+    }
+    html.theme-oled {
+      --bg-chrome: #000000;
+      --bg-toolbar: #08080a;
+      --bg-viewport: #000000;
+      --bg-card: #0e0e12;
+      --border-subtle: #1f1f26;
+    }
+    html.theme-forest {
+      --bg-chrome: #111c18;
+      --bg-toolbar: #16241f;
+      --bg-viewport: #0c1512;
+      --bg-card: #192b24;
+      --border-subtle: #263f35;
+    }
+
+    html.theme-muir-colts body,
+    html.theme-oled body,
+    html.theme-forest body {
+      background-color: var(--bg-viewport);
+    }
+    html.theme-muir-colts .cb-chrome,
+    html.theme-oled .cb-chrome,
+    html.theme-forest .cb-chrome {
+      background-color: var(--bg-chrome);
+      border-color: var(--border-subtle);
+    }
+    html.theme-muir-colts .cb-toolbar,
+    html.theme-oled .cb-toolbar,
+    html.theme-forest .cb-toolbar {
+      background-color: var(--bg-toolbar);
+      border-color: var(--border-subtle);
+    }
+    html.theme-muir-colts .cb-viewport,
+    html.theme-oled .cb-viewport,
+    html.theme-forest .cb-viewport {
+      background-color: var(--bg-viewport);
+    }
+    html.theme-muir-colts .cb-card,
+    html.theme-oled .cb-card,
+    html.theme-forest .cb-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-subtle);
+    }
+
+    /* Dynamic Accent Utilities */
+    .accent-bg { background-color: var(--accent) !important; }
+    .accent-bg:hover { background-color: var(--accent-hover) !important; }
+    .accent-text { color: var(--accent) !important; }
+    .accent-soft-bg { background-color: var(--accent-soft) !important; }
+    .accent-border { border-color: var(--accent-border) !important; }
+    .accent-ring:focus-within { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent) !important; }
+
+    /* Density Modes */
+    body.density-compact .cb-toolbar { padding-top: 0.3rem; padding-bottom: 0.3rem; }
+    body.density-compact .cb-tab { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+
+    /* Hide Scrollbars cleanly */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes progressSweep {
+      0% { transform: translateX(-100%); }
+      55% { transform: translateX(-15%); }
+      100% { transform: translateX(0%); }
+    }
+    .loading-bar-active {
+      animation: progressSweep 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 h-screen w-screen overflow-hidden flex flex-col select-none font-sans transition-colors duration-200">
+
+  <!-- Top Browser Chrome -->
+  <header id="browser-header" class="cb-chrome bg-slate-200/95 dark:bg-zinc-900 border-b border-slate-300 dark:border-zinc-800 flex flex-col z-20 shadow-sm">
+    
+    <!-- Tab Bar & Branding Row -->
+    <div class="flex items-center px-2.5 pt-2 gap-2">
+      <!-- Brand Identity + Version & Muir Tag -->
+      <div class="flex items-center gap-2 pr-2 py-1 flex-shrink-0">
+        <div class="w-6 h-6 rounded-lg accent-bg text-white flex items-center justify-center shadow-sm">
+          <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-extrabold tracking-tight text-slate-800 dark:text-white">ColtBrowser</span>
+          <span class="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-md accent-soft-bg accent-text border accent-border">v1.1.0 BETA</span>
+        </div>
+        <span class="hidden lg:inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400 border-l border-slate-300 dark:border-zinc-700 pl-2">
+          <i data-lucide="graduation-cap" class="w-3 h-3 accent-text"></i>
+          Built for Muir Middle School
+        </span>
+      </div>
+
+      <!-- Scrollable Tab Strip -->
+      <div id="tab-list" class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <!-- Tabs rendered dynamically -->
+      </div>
+
+      <!-- New Tab & Tab Counter -->
+      <div class="flex items-center gap-1 flex-shrink-0 pb-0.5">
+        <button id="btn-new-tab" title="New Tab (Ctrl+T)" class="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:bg-slate-300/70 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+        <button id="btn-tab-overview" title="Open Tabs Overview" class="px-2 py-1 rounded-lg bg-slate-300/60 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:opacity-90 text-[11px] font-mono font-bold transition">
+          <span id="tab-count-badge">1</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Navigation & Omnibox Toolbar -->
+    <div class="cb-toolbar bg-white dark:bg-zinc-900/95 px-2.5 py-2 flex items-center gap-1.5 sm:gap-2 border-t border-slate-300/60 dark:border-zinc-800/80">
+      <!-- Navigation Controls -->
+      <div class="flex items-center gap-0.5 sm:gap-1">
+        <button id="btn-back" title="Back" disabled class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </button>
+        <button id="btn-forward" title="Forward" disabled class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+        <button id="btn-refresh" title="Reload Page" class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+        </button>
+        <button id="btn-home" title="ColtBrowser Home" class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="home" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Unified Omnibox -->
+      <form id="omnibox-form" class="accent-ring flex-1 flex items-center bg-slate-100 dark:bg-zinc-800/90 hover:bg-slate-200/70 dark:hover:bg-zinc-800 focus-within:bg-white dark:focus-within:bg-zinc-950 border border-slate-200 dark:border-zinc-700/80 rounded-xl px-3 py-1.5 transition">
+        <!-- Protocol / DuckDuckGo Security Pill -->
+        <div id="omnibox-badge" class="flex items-center gap-1.5 pr-2 text-emerald-600 dark:text-emerald-400 flex-shrink-0" title="DuckDuckGo Privacy Protection Active">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span id="omnibox-protocol-label" class="hidden md:inline text-[11px] font-mono font-medium">DDG</span>
+        </div>
+
+        <input
+          id="omnibox-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search privately with DuckDuckGo or type a URL (e.g. colt://settings)..."
+          class="w-full bg-transparent text-sm text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
+        />
+
+        <!-- Quick Clear Input Button -->
+        <button type="button" id="btn-omnibox-clear" title="Clear Address Bar" class="hidden p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- Bookmark Toggle Star -->
+        <button type="button" id="btn-bookmark-toggle" title="Bookmark this page" class="p-1 rounded-md text-slate-400 hover:text-amber-400 transition ml-1 flex-shrink-0">
+          <i id="icon-bookmark-star" data-lucide="star" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Go Submit -->
+        <button type="submit" title="Search or Navigate" class="ml-1.5 px-2.5 py-1 rounded-lg accent-bg text-white text-xs font-semibold transition flex-shrink-0">
+          Go
+        </button>
+      </form>
+
+      <!-- Right Utility Toolbar -->
+      <div class="flex items-center gap-1">
+        <!-- Tracker Shield Counter -->
+        <button id="btn-shield" title="ColtShield Privacy Report" class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg accent-soft-bg accent-text text-xs font-semibold transition">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+          <span id="tracker-count">18</span>
+        </button>
+
+        <!-- Focus Mode / Side Notes Toggle -->
+        <button id="btn-focus-notes" title="Toggle Side Scratchpad / Focus Mode" class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="panel-right" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Library Drawer (History, Bookmarks, Notes) -->
+        <button id="btn-drawer" title="Library: History, Bookmarks & Notes" class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Settings Gear Button -->
+        <button id="btn-settings" title="ColtBrowser Settings (colt://settings)" class="p-2 rounded-lg text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Persistent Bookmarks Bar -->
+    <div id="bookmarks-bar" class="cb-chrome bg-slate-50 dark:bg-zinc-900/90 px-3 py-1.5 flex items-center justify-between gap-2 border-t border-slate-200/80 dark:border-zinc-800/80 text-xs">
+      <div id="bookmarks-list" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
+        <!-- Bookmarks injected dynamically -->
+      </div>
+      <button id="btn-add-bookmark-modal" title="Add Custom Bookmark" class="flex items-center gap-1 px-2 py-0.5 rounded-md text-slate-500 dark:text-zinc-400 hover:bg-slate-200/70 dark:hover:bg-zinc-800 flex-shrink-0 transition">
+        <i data-lucide="plus" class="w-3 h-3"></i>
+        <span class="hidden sm:inline">Add</span>
+      </button>
+    </div>
+
+    <!-- Top Loading Progress Indicator -->
+    <div class="h-0.5 w-full bg-transparent overflow-hidden">
+      <div id="loading-bar" class="h-full accent-bg w-0"></div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Area -->
+  <main class="flex-1 relative overflow-hidden flex">
+    
+    <!-- Primary Tab Viewport -->
+    <div id="viewport-container" class="cb-viewport flex-1 h-full w-full relative overflow-y-auto bg-white dark:bg-zinc-950">
+      <!-- Views: Start Page, DuckDuckGo Search, Web Iframe, or colt://settings -->
+    </div>
+
+    <!-- Split-View Side Scratchpad Panel (Toggleable) -->
+    <aside id="split-notes-panel" class="hidden w-80 sm:w-96 cb-chrome bg-slate-50 dark:bg-zinc-900 border-l border-slate-200 dark:border-zinc-800 flex-col h-full z-10">
+      <div class="p-3.5 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="notebook-pen" class="w-4 h-4 accent-text"></i>
+          <span class="text-xs font-bold uppercase tracking-wider">Muir Student Scratchpad</span>
+        </div>
+        <button id="btn-close-split-notes" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="p-3 flex-1 flex flex-col gap-2">
+        <p class="text-[11px] text-slate-500 dark:text-zinc-400">Take notes side-by-side while researching. Auto-saved locally.</p>
+        <textarea id="split-notes-textarea" placeholder="Write class notes, research links, or homework reminders here..." class="flex-1 w-full p-3 rounded-xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs leading-relaxed focus:outline-none accent-ring resize-none"></textarea>
+        <div class="flex items-center justify-between text-[11px] text-slate-400">
+          <span id="split-notes-status">Saved to browser</span>
+          <button id="btn-copy-notes" class="accent-text font-semibold hover:underline">Copy Notes</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Slide-Over Library Drawer (History, Bookmarks, Notes) -->
+    <aside id="library-drawer" class="w-80 sm:w-96 cb-chrome bg-white dark:bg-zinc-900 border-l border-slate-200 dark:border-zinc-800 h-full shadow-2xl transform translate-x-full transition-transform duration-200 ease-out fixed right-0 top-0 bottom-0 z-40 flex flex-col">
+      <div class="p-4 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full accent-bg"></span>
+          <h2 class="font-bold text-sm">ColtBrowser Library</h2>
+        </div>
+        <button id="btn-close-drawer" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Tabs -->
+      <div class="grid grid-cols-3 p-2 gap-1 bg-slate-100 dark:bg-zinc-950/60 border-b border-slate-200 dark:border-zinc-800 text-xs font-semibold">
+        <button id="drawer-tab-bookmarks" class="py-1.5 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm transition">Bookmarks</button>
+        <button id="drawer-tab-history" class="py-1.5 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition">History</button>
+        <button id="drawer-tab-notes" class="py-1.5 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition">Notes</button>
+      </div>
+
+      <!-- Optional Search inside Drawer -->
+      <div id="drawer-search-wrap" class="px-3 pt-3">
+        <input id="drawer-search-input" type="text" placeholder="Filter items..." class="w-full px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs focus:outline-none accent-ring" />
+      </div>
+
+      <!-- Drawer Body -->
+      <div id="drawer-content" class="flex-1 overflow-y-auto p-3 space-y-1.5">
+        <!-- Dynamic Content -->
+      </div>
+
+      <!-- Drawer Footer -->
+      <div id="drawer-footer" class="p-3 border-t border-slate-200 dark:border-zinc-800 flex justify-between items-center text-xs text-slate-500">
+        <span id="drawer-count-label">0 items</span>
+        <button id="btn-clear-history" class="hidden text-rose-500 hover:underline font-semibold">Clear History</button>
+      </div>
+    </aside>
+
+    <!-- Backdrop for Drawer / Modals -->
+    <div id="drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-30 hidden"></div>
+
+    <!-- Add Custom Bookmark / Shortcut Modal -->
+    <div id="custom-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div class="cb-card bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-5 shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <h3 id="modal-title" class="text-base font-bold">Add Bookmark</h3>
+          <button id="btn-close-modal" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <form id="modal-form" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1 text-slate-500 dark:text-zinc-400">Title</label>
+            <input id="modal-input-title" type="text" required placeholder="e.g., Muir Homework Portal" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm focus:outline-none accent-ring" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1 text-slate-500 dark:text-zinc-400">URL</label>
+            <input id="modal-input-url" type="text" required placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm font-mono focus:outline-none accent-ring" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" id="btn-cancel-modal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-xl accent-bg text-white text-xs font-semibold">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab Overview Modal -->
+    <div id="tabs-overview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div class="cb-card bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-2xl p-5 shadow-2xl max-h-[80vh] flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 accent-text"></i>
+            <h3 class="text-base font-bold">Open Tabs (<span id="overview-tab-count">0</span>)</h3>
+          </div>
+          <button id="btn-close-overview" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div id="overview-tabs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto pr-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-zinc-900 dark:bg-zinc-800 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-xl border border-zinc-700/80 opacity-0 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full accent-bg"></span>
+      <span id="toast-text">Notification</span>
+    </div>
+  </main>
+
+  <script>
+    /**
+     * ColtBrowser v1.1.0 BETA — Built for Muir Middle School (HVS)
+     * Complete single-file architecture with persistent settings, themes, accent colors,
+     * DuckDuckGo Instant Answer API integration, smart sandboxing, and student study tools.
+     */
+    (function () {
+      const STORAGE_PREFIX = 'coltbrowser_v110_';
+
+      // --- Default Data ---
+      const DEFAULT_SETTINGS = {
+        theme: 'dark',            // 'dark' | 'light' | 'muir-colts' | 'oled' | 'forest'
+        accent: 'orange',         // 'orange' | 'blue' | 'gold' | 'emerald' | 'purple' | 'rose'
+        fontFamily: 'sans',       // 'sans' | 'mono' | 'serif'
+        density: 'comfortable',   // 'comfortable' | 'compact'
+        showBookmarksBar: true,
+        showStudyWidgets: true,
+        showShortcuts: true,
+        ddgMode: 'standard',      // 'standard' | 'lite' | 'strict'
+        shieldLevel: 'standard',  // 'standard' | 'strict'
+        startupBehavior: 'home',  // 'home' | 'blank' | 'custom'
+        homepageUrl: 'colt://newtab'
+      };
+
+      const ACCENT_PALETTES = {
+        orange:  { main: '#f97316', hover: '#ea580c', soft: 'rgba(249, 115, 22, 0.14)', border: 'rgba(249, 115, 22, 0.35)' },
+        blue:    { main: '#3b82f6', hover: '#2563eb', soft: 'rgba(59, 130, 246, 0.14)', border: 'rgba(59, 130, 246, 0.35)' },
+        gold:    { main: '#eab308', hover: '#ca8a04', soft: 'rgba(234, 179, 8, 0.15)',  border: 'rgba(234, 179, 8, 0.38)' },
+        emerald: { main: '#10b981', hover: '#059669', soft: 'rgba(16, 185, 129, 0.14)', border: 'rgba(16, 185, 129, 0.35)' },
+        purple:  { main: '#a855f7', hover: '#9333ea', soft: 'rgba(168, 85, 247, 0.14)', border: 'rgba(168, 85, 247, 0.35)' },
+        rose:    { main: '#f43f5e', hover: '#e11d48', soft: 'rgba(244, 63, 94, 0.14)',  border: 'rgba(244, 63, 94, 0.35)' }
+      };
+
+      const DEFAULT_BOOKMARKS = [
+        { title: 'HVS Portal', url: 'https://www.hvs.org', icon: '🏫' },
+        { title: 'DuckDuckGo', url: 'https://duckduckgo.com', icon: '🦆' },
+        { title: 'Wikipedia', url: 'https://en.m.wikipedia.org', icon: '📚' },
+        { title: 'Khan Academy', url: 'https://www.khanacademy.org', icon: '🎓' },
+        { title: 'Desmos Calc', url: 'https://www.desmos.com/calculator', icon: '📐' },
+        { title: 'Internet Archive', url: 'https://archive.org', icon: '🏛️' },
+        { title: 'Settings', url: 'colt://settings', icon: '⚙️' }
+      ];
+
+      const DEFAULT_SHORTCUTS = [
+        { title: 'Huron Valley Schools', url: 'https://www.hvs.org', desc: 'HVS District & Muir Info', letter: 'H' },
+        { title: 'DuckDuckGo', url: 'https://duckduckgo.com', desc: 'Private Search Engine', letter: 'D' },
+        { title: 'Wikipedia', url: 'https://en.m.wikipedia.org', desc: 'Free Encyclopedia', letter: 'W' },
+        { title: 'Khan Academy', url: 'https://www.khanacademy.org', desc: 'Math & Science Practice', letter: 'K' },
+        { title: 'Desmos Graphing', url: 'https://www.desmos.com/calculator', desc: 'Interactive Math Tools', letter: '∑' },
+        { title: 'ColtBrowser Settings', url: 'colt://settings', desc: 'Themes & Customization', letter: '⚙' }
+      ];
+
+      // --- Global State ---
+      let state = {
+        tabs: [],
+        activeTabId: null,
+        settings: { ...DEFAULT_SETTINGS },
+        bookmarks: [],
+        shortcuts: [],
+        history: [],
+        notes: '',
+        drawerOpen: false,
+        drawerMode: 'bookmarks', // 'bookmarks' | 'history' | 'notes'
+        splitNotesOpen: false,
+        modalMode: 'bookmark',   // 'bookmark' | 'shortcut'
+        trackersBlocked: 18,
+        timerSeconds: 25 * 60,
+        timerRunning: false,
+        timerInterval: null
+      };
+
+      // --- Storage Helpers ---
+      function saveKey(key, value) {
+        try {
+          localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+        } catch (e) {}
+      }
+
+      function loadKey(key, fallback) {
+        try {
+          const raw = localStorage.getItem(STORAGE_PREFIX + key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function loadAllState() {
+        state.settings = { ...DEFAULT_SETTINGS, ...loadKey('settings', {}) };
+        state.bookmarks = loadKey('bookmarks', [...DEFAULT_BOOKMARKS]);
+        state.shortcuts = loadKey('shortcuts', [...DEFAULT_SHORTCUTS]);
+        state.history = loadKey('history', []);
+        state.notes = loadKey('notes', '');
+        state.trackersBlocked = loadKey('trackers', 18);
+      }
+
+      // --- Apply Appearance & Settings ---
+      function applySettings() {
+        const html = document.documentElement;
+        const body = document.body;
+        const s = state.settings;
+
+        // Reset theme classes
+        html.classList.remove('dark', 'theme-muir-colts', 'theme-oled', 'theme-forest');
+        if (s.theme === 'light') {
+          // Light mode has no 'dark' class
+        } else if (s.theme === 'muir-colts') {
+          html.classList.add('dark', 'theme-muir-colts');
+        } else if (s.theme === 'oled') {
+          html.classList.add('dark', 'theme-oled');
+        } else if (s.theme === 'forest') {
+          html.classList.add('dark', 'theme-forest');
+        } else {
+          html.classList.add('dark');
+        }
+
+        // Apply Accent CSS Variables
+        const palette = ACCENT_PALETTES[s.accent] || ACCENT_PALETTES.orange;
+        html.style.setProperty('--accent', palette.main);
+        html.style.setProperty('--accent-hover', palette.hover);
+        html.style.setProperty('--accent-soft', palette.soft);
+        html.style.setProperty('--accent-border', palette.border);
+
+        // Apply Typography
+        const fontMap = {
+          sans: "'Inter', system-ui, sans-serif",
+          mono: "'JetBrains Mono', monospace",
+          serif: "'Lora', Georgia, serif"
+        };
+        html.style.setProperty('--ui-font', fontMap[s.fontFamily] || fontMap.sans);
+        body.style.fontFamily = fontMap[s.fontFamily] || fontMap.sans;
+
+        // Apply Density
+        body.classList.toggle('density-compact', s.density === 'compact');
+
+        // Toggle Bookmarks Bar visibility
+        const bmBar = document.getElementById('bookmarks-bar');
+        bmBar.classList.toggle('hidden', !s.showBookmarksBar);
+
+        // Update Tracker Shield count
+        document.getElementById('tracker-count').textContent = state.trackersBlocked;
+      }
+
+      // --- Toast Notification ---
+      let toastTimer = null;
+      function showToast(msg) {
+        const toast = document.getElementById('toast-notification');
+        document.getElementById('toast-text').textContent = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 2500);
+      }
+
+      // --- Progress Bar Animation ---
+      function triggerProgress() {
+        const bar = document.getElementById('loading-bar');
+        bar.classList.remove('loading-bar-active');
+        bar.style.width = '0%';
+        void bar.offsetWidth;
+        bar.style.width = '100%';
+        bar.classList.add('loading-bar-active');
+        setTimeout(() => {
+          bar.style.width = '0%';
+          bar.classList.remove('loading-bar-active');
+        }, 650);
+      }
+
+      // --- Tab Management ---
+      function getStartupUrl() {
+        if (state.settings.startupBehavior === 'blank') return 'colt://blank';
+        if (state.settings.startupBehavior === 'custom' && state.settings.homepageUrl.trim()) {
+          return state.settings.homepageUrl.trim();
+        }
+        return 'colt://newtab';
+      }
+
+      function createTab(initialUrl = null) {
+        const targetUrl = initialUrl || getStartupUrl();
+        const id = 'tab_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const tab = {
+          id,
+          title: 'New Tab',
+          favicon: '🐎',
+          stack: [],
+          stackIndex: -1
+        };
+        state.tabs.push(tab);
+        state.activeTabId = id;
+        navigateTab(id, targetUrl, true);
+      }
+
+      function closeTab(id, e) {
+        if (e) e.stopPropagation();
+        const idx = state.tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+
+        state.tabs.splice(idx, 1);
+        if (state.tabs.length === 0) {
+          createTab('colt://newtab');
+          return;
+        }
+        if (state.activeTabId === id) {
+          const nextIdx = Math.min(idx, state.tabs.length - 1);
+          state.activeTabId = state.tabs[nextIdx].id;
+        }
+        renderAll();
+      }
+
+      function switchTab(id) {
+        if (state.activeTabId === id) return;
+        state.activeTabId = id;
+        renderAll();
+      }
+
+      function getActiveTab() {
+        return state.tabs.find(t => t.id === state.activeTabId);
+      }
+
+      // --- Input & URL Parsing ---
+      function parseInputToTarget(rawInput) {
+        const trimmed = (rawInput || '').trim();
+        if (!trimmed || trimmed === 'colt://newtab') {
+          return { type: 'internal', url: 'colt://newtab' };
+        }
+        if (trimmed.startsWith('colt://')) {
+          return { type: 'internal', url: trimmed.toLowerCase() };
+        }
+        if (trimmed.startsWith('ddg:') || trimmed.startsWith('?')) {
+          const q = trimmed.replace(/^(ddg:|\?)/, '').trim();
+          return { type: 'search', query: q, url: `colt://search?q=${encodeURIComponent(q)}` };
+        }
+
+        const hasProtocol = /^https?:\/\//i.test(trimmed);
+        const isDomainLike = !/\s/.test(trimmed) && (trimmed.includes('.') || trimmed.startsWith('localhost'));
+
+        if (hasProtocol || isDomainLike) {
+          const normalized = hasProtocol ? trimmed : 'https://' + trimmed;
+          return { type: 'web', url: normalized };
+        }
+
+        return {
+          type: 'search',
+          query: trimmed,
+          url: `colt://search?q=${encodeURIComponent(trimmed)}`
+        };
+      }
+
+      function navigateActive(rawInput) {
+        const tab = getActiveTab();
+        if (!tab) return;
+        navigateTab(tab.id, rawInput, true);
+      }
+
+      function navigateTab(tabId, rawInput, pushToStack = true) {
+        const tab = state.tabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        const target = parseInputToTarget(rawInput);
+        triggerProgress();
+
+        // Increment blocked trackers based on shield level
+        if (target.type === 'web' || target.type === 'search') {
+          const bump = state.settings.shieldLevel === 'strict'
+            ? Math.floor(Math.random() * 5) + 2
+            : Math.floor(Math.random() * 3) + 1;
+          state.trackersBlocked += bump;
+          saveKey('trackers', state.trackersBlocked);
+          document.getElementById('tracker-count').textContent = state.trackersBlocked;
+        }
+
+        if (pushToStack) {
+          tab.stack = tab.stack.slice(0, tab.stackIndex + 1);
+          tab.stack.push(target.url);
+          tab.stackIndex = tab.stack.length - 1;
+        }
+
+        updateTabMetadata(tab, target);
+
+        if (target.url !== 'colt://newtab' && target.url !== 'colt://blank') {
+          state.history.unshift({
+            title: tab.title,
+            url: target.url,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          state.history = state.history.slice(0, 150);
+          saveKey('history', state.history);
+        }
+
+        if (tab.id === state.activeTabId) {
+          renderAll();
+        } else {
+          renderTabs();
+        }
+      }
+
+      function updateTabMetadata(tab, target) {
+        if (target.url === 'colt://newtab') {
+          tab.title = 'New Tab';
+          tab.favicon = '🐎';
+        } else if (target.url === 'colt://blank') {
+          tab.title = 'Blank Tab';
+          tab.favicon = '📄';
+        } else if (target.url === 'colt://settings') {
+          tab.title = 'Settings — ColtBrowser';
+          tab.favicon = '⚙️';
+        } else if (target.url.startsWith('colt://search')) {
+          const params = new URLSearchParams(target.url.split('?')[1]);
+          const q = params.get('q') || 'Search';
+          tab.title = `${q} — DuckDuckGo`;
+          tab.favicon = '🦆';
+        } else {
+          try {
+            const u = new URL(target.url);
+            tab.title = u.hostname.replace(/^www\./, '');
+            tab.favicon = '🌐';
+          } catch (e) {
+            tab.title = target.url;
+            tab.favicon = '🌐';
+          }
+        }
+      }
+
+      function goBack() {
+        const tab = getActiveTab();
+        if (!tab || tab.stackIndex <= 0) return;
+        tab.stackIndex--;
+        const url = tab.stack[tab.stackIndex];
+        updateTabMetadata(tab, parseInputToTarget(url));
+        triggerProgress();
+        renderAll();
+      }
+
+      function goForward() {
+        const tab = getActiveTab();
+        if (!tab || tab.stackIndex >= tab.stack.length - 1) return;
+        tab.stackIndex++;
+        const url = tab.stack[tab.stackIndex];
+        updateTabMetadata(tab, parseInputToTarget(url));
+        triggerProgress();
+        renderAll();
+      }
+
+      function reloadCurrent() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.stackIndex] || 'colt://newtab';
+        triggerProgress();
+        renderViewport(tab, currentUrl);
+      }
+
+      // --- Render Chrome & Toolbars ---
+      function renderAll() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.stackIndex] || 'colt://newtab';
+
+        renderTabs();
+        updateToolbarState(tab, currentUrl);
+        renderViewport(tab, currentUrl);
+        if (state.drawerOpen) renderDrawer();
+      }
+
+      function renderTabs() {
+        const tabList = document.getElementById('tab-list');
+        tabList.innerHTML = '';
+        document.getElementById('tab-count-badge').textContent = state.tabs.length;
+
+        state.tabs.forEach(tab => {
+          const isActive = tab.id === state.activeTabId;
+          const el = document.createElement('div');
+          el.className = `cb-tab group flex items-center gap-2 px-3 py-1.5 rounded-t-xl text-xs font-medium cursor-pointer max-w-[210px] min-w-[125px] transition-all border-t border-x ${
+            isActive
+              ? 'cb-toolbar bg-white dark:bg-zinc-900 text-slate-900 dark:text-white border-slate-300/80 dark:border-zinc-800 shadow-sm'
+              : 'bg-slate-200/40 dark:bg-zinc-950/40 text-slate-600 dark:text-zinc-400 border-transparent hover:bg-slate-300/50 dark:hover:bg-zinc-800/60'
+          }`;
+
+          el.innerHTML = `
+            <span class="text-sm leading-none flex-shrink-0">${tab.favicon}</span>
+            <span class="truncate flex-1">${escapeHtml(tab.title)}</span>
+            <button class="tab-close p-0.5 rounded-md opacity-60 group-hover:opacity-100 hover:bg-slate-300 dark:hover:bg-zinc-700 transition" title="Close Tab">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          `;
+
+          el.addEventListener('click', () => switchTab(tab.id));
+          el.addEventListener('auxclick', (e) => {
+            if (e.button === 1) closeTab(tab.id, e);
+          });
+          el.querySelector('.tab-close').addEventListener('click', (e) => closeTab(tab.id, e));
+          tabList.appendChild(el);
+        });
+
+        lucide.createIcons();
+      }
+
+      function updateToolbarState(tab, currentUrl) {
+        document.getElementById('btn-back').disabled = tab.stackIndex <= 0;
+        document.getElementById('btn-forward').disabled = tab.stackIndex >= tab.stack.length - 1;
+
+        const input = document.getElementById('omnibox-input');
+        const clearBtn = document.getElementById('btn-omnibox-clear');
+        const protoLabel = document.getElementById('omnibox-protocol-label');
+
+        if (currentUrl === 'colt://newtab' || currentUrl === 'colt://blank') {
+          input.value = '';
+          protoLabel.textContent = 'DDG';
+        } else if (currentUrl.startsWith('colt://search')) {
+          const params = new URLSearchParams(currentUrl.split('?')[1]);
+          input.value = params.get('q') || '';
+          protoLabel.textContent = 'DDG';
+        } else if (currentUrl.startsWith('colt://')) {
+          input.value = currentUrl;
+          protoLabel.textContent = 'COLT';
+        } else {
+          input.value = currentUrl;
+          protoLabel.textContent = currentUrl.startsWith('https://') ? 'HTTPS' : 'WEB';
+        }
+
+        clearBtn.classList.toggle('hidden', !input.value);
+
+        // Update bookmark star
+        const isBookmarked = state.bookmarks.some(b => b.url === currentUrl);
+        const starBtn = document.getElementById('btn-bookmark-toggle');
+        const starIcon = document.getElementById('icon-bookmark-star');
+        if (isBookmarked) {
+          starBtn.classList.add('text-amber-400');
+          starBtn.classList.remove('text-slate-400');
+          starIcon.setAttribute('fill', 'currentColor');
+        } else {
+          starBtn.classList.remove('text-amber-400');
+          starBtn.classList.add('text-slate-400');
+          starIcon.setAttribute('fill', 'none');
+        }
+      }
+
+      function renderBookmarksBar() {
+        const list = document.getElementById('bookmarks-list');
+        list.innerHTML = '';
+        state.bookmarks.forEach(bm => {
+          const btn = document.createElement('button');
+          btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-slate-600 dark:text-zinc-300 hover:bg-slate-200/80 dark:hover:bg-zinc-800 whitespace-nowrap transition';
+          btn.innerHTML = `<span>${bm.icon || '🔖'}</span><span>${escapeHtml(bm.title)}</span>`;
+          btn.addEventListener('click', () => navigateActive(bm.url));
+          list.appendChild(btn);
+        });
+      }
+
+      // --- Viewport Content Renderers ---
+      function renderViewport(tab, currentUrl) {
+        const viewport = document.getElementById('viewport-container');
+
+        if (currentUrl === 'colt://blank') {
+          viewport.innerHTML = `<div class="h-full w-full flex items-center justify-center text-xs text-slate-400 dark:text-zinc-600 font-mono">colt://blank — Press Home or enter a DuckDuckGo search above</div>`;
+          return;
+        }
+
+        if (currentUrl === 'colt://newtab') {
+          renderStartPage(viewport);
+        } else if (currentUrl === 'colt://settings') {
+          renderSettingsPage(viewport);
+        } else if (currentUrl.startsWith('colt://search')) {
+          const params = new URLSearchParams(currentUrl.split('?')[1]);
+          renderDuckDuckGoSearch(viewport, params.get('q') || '');
+        } else {
+          renderWebFrame(viewport, currentUrl);
+        }
+
+        lucide.createIcons();
+      }
+
+      // 1. Custom New Tab / Home Page
+      function renderStartPage(viewport) {
+        const s = state.settings;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+
+        viewport.innerHTML = `
+          <div class="min-h-full flex flex-col items-center justify-center px-4 py-10">
+            <div class="w-full max-w-3xl flex flex-col items-center text-center">
+              
+              <!-- Muir Middle School & Privacy Badge -->
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full accent-soft-bg border accent-border accent-text text-xs font-semibold mb-5">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+                <span>Built for Muir Middle School (HVS) • DuckDuckGo Powered</span>
+              </div>
+
+              <!-- Hero Title -->
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-12 h-12 rounded-2xl accent-bg text-white flex items-center justify-center shadow-lg text-2xl">
+                  🐎
+                </div>
+                <div class="text-left">
+                  <div class="flex items-center gap-2">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">ColtBrowser</h1>
+                    <span class="px-2 py-0.5 text-xs font-mono font-bold rounded-lg accent-soft-bg accent-text border accent-border">v1.1.0 BETA</span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-zinc-400">Private, distraction-free student browsing</p>
+                </div>
+              </div>
+
+              <!-- Home DuckDuckGo Search Input -->
+              <form id="home-search-form" class="w-full mt-6 mb-8">
+                <div class="cb-card accent-ring flex items-center bg-white dark:bg-zinc-900 border-2 border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 shadow-xl shadow-slate-200/40 dark:shadow-black/40 transition">
+                  <span class="text-xl mr-3" title="DuckDuckGo">🦆</span>
+                  <input
+                    id="home-search-input"
+                    type="text"
+                    placeholder="Search privately with DuckDuckGo or enter any URL..."
+                    class="w-full bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
+                    autofocus
+                  />
+                  <button type="submit" class="ml-3 px-5 py-2 rounded-xl accent-bg text-white text-sm font-semibold shadow-md transition flex-shrink-0">
+                    Search
+                  </button>
+                </div>
+              </form>
+
+              <!-- Muir Student Focus Widgets (Clock/Study Timer + Quick Notes) -->
+              ${s.showStudyWidgets ? `
+                <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
+                  <!-- Study Timer & Clock Card -->
+                  <div class="cb-card p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 accent-text"></i>
+                        Muir Study Focus Timer
+                      </span>
+                      <span class="text-xs font-mono text-slate-400">${dateStr}</span>
+                    </div>
+                    <div class="flex items-baseline justify-between my-2">
+                      <div>
+                        <div id="home-timer-display" class="text-3xl font-mono font-bold tracking-tight">${formatTimer(state.timerSeconds)}</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">Local Time: ${timeStr}</div>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <button id="btn-timer-toggle" class="px-3 py-1.5 rounded-xl accent-bg text-white text-xs font-semibold transition">
+                          ${state.timerRunning ? 'Pause' : 'Start 25m'}
+                        </button>
+                        <button id="btn-timer-reset" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-xs font-semibold hover:opacity-80 transition">
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Scratchpad Card -->
+                  <div class="cb-card p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
+                        <i data-lucide="notebook-pen" class="w-3.5 h-3.5 accent-text"></i>
+                        Quick Student Notes
+                      </span>
+                      <span class="text-[11px] text-emerald-500 font-medium">Auto-saved</span>
+                    </div>
+                    <textarea id="home-notes-input" rows="3" placeholder="Jot down homework, class periods, or quick links..." class="w-full bg-slate-50 dark:bg-zinc-950/70 border border-slate-200/80 dark:border-zinc-800 rounded-xl p-2.5 text-xs focus:outline-none accent-ring resize-none">${escapeHtml(state.notes)}</textarea>
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- Customizable Quick Shortcuts Grid -->
+              ${s.showShortcuts ? `
+                <div class="w-full">
+                  <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3 px-1">
+                    <span>Quick Shortcuts</span>
+                    <button id="btn-add-shortcut" class="inline-flex items-center gap-1 accent-text hover:underline lowercase font-semibold">
+                      <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Shortcut
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    ${state.shortcuts.map((item, idx) => `
+                      <div class="cb-card group relative flex items-center gap-3 p-3.5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 hover:shadow-md transition text-left cursor-pointer" data-shortcut-url="${escapeHtml(item.url)}">
+                        <div class="w-10 h-10 rounded-xl accent-bg text-white font-bold flex items-center justify-center text-base shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                          ${escapeHtml(item.letter || item.title.charAt(0).toUpperCase())}
+                        </div>
+                        <div class="overflow-hidden flex-1">
+                          <div class="text-sm font-semibold truncate">${escapeHtml(item.title)}</div>
+                          <div class="text-xs text-slate-400 dark:text-zinc-500 truncate">${escapeHtml(item.desc || item.url)}</div>
+                        </div>
+                        <button data-remove-shortcut="${idx}" title="Remove Shortcut" class="remove-shortcut-btn opacity-0 group-hover:opacity-100 p-1 rounded-lg text-slate-400 hover:text-rose-500 transition">
+                          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+            </div>
+          </div>
+        `;
+
+        // Bind Home Events
+        document.getElementById('home-search-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = document.getElementById('home-search-input').value;
+          if (val.trim()) navigateActive(val);
+        });
+
+        if (s.showStudyWidgets) {
+          document.getElementById('btn-timer-toggle').addEventListener('click', toggleStudyTimer);
+          document.getElementById('btn-timer-reset').addEventListener('click', resetStudyTimer);
+          const homeNotes = document.getElementById('home-notes-input');
+          homeNotes.addEventListener('input', (e) => {
+            state.notes = e.target.value;
+            saveKey('notes', state.notes);
+            document.getElementById('split-notes-textarea').value = state.notes;
+          });
+        }
+
+        if (s.showShortcuts) {
+          document.getElementById('btn-add-shortcut').addEventListener('click', () => openModal('shortcut'));
+          viewport.querySelectorAll('[data-shortcut-url]').forEach(card => {
+            card.addEventListener('click', (e) => {
+              if (e.target.closest('.remove-shortcut-btn')) return;
+              navigateActive(card.getAttribute('data-shortcut-url'));
+            });
+          });
+          viewport.querySelectorAll('[data-remove-shortcut]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const idx = Number(btn.getAttribute('data-remove-shortcut'));
+              state.shortcuts.splice(idx, 1);
+              saveKey('shortcuts', state.shortcuts);
+              renderStartPage(viewport);
+              lucide.createIcons();
+              showToast('Shortcut removed');
+            });
+          });
+        }
+      }
+
+      // --- Study Timer Helpers ---
+      function formatTimer(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+      }
+
+      function toggleStudyTimer() {
+        if (state.timerRunning) {
+          clearInterval(state.timerInterval);
+          state.timerRunning = false;
+        } else {
+          state.timerRunning = true;
+          state.timerInterval = setInterval(() => {
+            if (state.timerSeconds > 0) {
+              state.timerSeconds--;
+              const disp = document.getElementById('home-timer-display');
+              if (disp) disp.textContent = formatTimer(state.timerSeconds);
+            } else {
+              clearInterval(state.timerInterval);
+              state.timerRunning = false;
+              showToast('Study session complete! Great work.');
+            }
+          }, 1000);
+        }
+        const btn = document.getElementById('btn-timer-toggle');
+        if (btn) btn.textContent = state.timerRunning ? 'Pause' : 'Resume';
+      }
+
+      function resetStudyTimer() {
+        clearInterval(state.timerInterval);
+        state.timerRunning = false;
+        state.timerSeconds = 25 * 60;
+        const disp = document.getElementById('home-timer-display');
+        const btn = document.getElementById('btn-timer-toggle');
+        if (disp) disp.textContent = formatTimer(state.timerSeconds);
+        if (btn) btn.textContent = 'Start 25m';
+      }
+
+      // 2. Full Settings & Customization Page (colt://settings)
+      function renderSettingsPage(viewport) {
+        const s = state.settings;
+
+        const themes = [
+          { id: 'dark', name: 'Classic Dark', desc: 'Balanced zinc dark mode', swatch: 'bg-zinc-900 border-zinc-700' },
+          { id: 'light', name: 'Daylight Light', desc: 'Clean bright workspace', swatch: 'bg-slate-100 border-slate-300' },
+          { id: 'muir-colts', name: 'Muir Colts Navy & Gold', desc: 'Official school spirit palette', swatch: 'bg-[#0b192c] border-amber-400' },
+          { id: 'oled', name: 'Midnight OLED', desc: 'Pure pitch-black contrast', swatch: 'bg-black border-zinc-800' },
+          { id: 'forest', name: 'Forest Sage', desc: 'Calm deep green study theme', swatch: 'bg-[#111c18] border-emerald-700' }
+        ];
+
+        const accents = [
+          { id: 'orange', name: 'DuckDuckGo Orange', hex: '#f97316' },
+          { id: 'blue', name: 'Colts Royal Blue', hex: '#3b82f6' },
+          { id: 'gold', name: 'Muir Varsity Gold', hex: '#eab308' },
+          { id: 'emerald', name: 'Emerald Green', hex: '#10b981' },
+          { id: 'purple', name: 'Electric Purple', hex: '#a855f7' },
+          { id: 'rose', name: 'Crimson Rose', hex: '#f43f5e' }
+        ];
+
+        viewport.innerHTML = `
+          <div class="max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200 dark:border-zinc-800">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h1 class="text-2xl font-extrabold tracking-tight">ColtBrowser Settings</h1>
+                  <span class="px-2 py-0.5 text-xs font-mono font-bold rounded-md accent-soft-bg accent-text border accent-border">v1.1.0 BETA</span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Customize themes, accent colors, layout widgets, search privacy, and startup behavior.</p>
+              </div>
+              <button id="btn-settings-done" class="px-4 py-2 rounded-xl accent-bg text-white text-xs font-semibold self-start sm:self-auto transition">
+                Done & Return Home
+              </button>
+            </div>
+
+            <!-- Section 1: Appearance & Themes -->
+            <section class="cb-card p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-5">
+              <div class="flex items-center gap-2">
+                <i data-lucide="palette" class="w-4 h-4 accent-text"></i>
+                <h2 class="text-sm font-bold uppercase tracking-wider">Appearance & Themes</h2>
+              </div>
+
+              <!-- Theme Cards -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-2.5">Browser Theme</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  ${themes.map(t => `
+                    <button data-set-theme="${t.id}" class="flex items-center gap-3 p-3 rounded-xl border text-left transition ${
+                      s.theme === t.id
+                        ? 'accent-border accent-soft-bg ring-1 ring-current accent-text'
+                        : 'border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600'
+                    }">
+                      <span class="w-7 h-7 rounded-lg border-2 ${t.swatch} flex-shrink-0"></span>
+                      <div>
+                        <div class="text-xs font-bold text-slate-900 dark:text-white">${t.name}</div>
+                        <div class="text-[11px] text-slate-500 dark:text-zinc-400">${t.desc}</div>
+                      </div>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Accent Color Picker -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-2.5">Accent Color</label>
+                <div class="flex flex-wrap gap-2.5">
+                  ${accents.map(a => `
+                    <button data-set-accent="${a.id}" class="flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition ${
+                      s.accent === a.id
+                        ? 'accent-border accent-soft-bg text-slate-900 dark:text-white'
+                        : 'border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 hover:border-slate-400'
+                    }">
+                      <span class="w-3.5 h-3.5 rounded-full" style="background-color: ${a.hex}"></span>
+                      <span>${a.name}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </section>
+
+            <!-- Section 2: Typography & Layout -->
+            <section class="cb-card p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="layout-template" class="w-4 h-4 accent-text"></i>
+                <h2 class="text-sm font-bold uppercase tracking-wider">Typography & Layout</h2>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">UI Font Family</label>
+                  <select id="select-font" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none accent-ring">
+                    <option value="sans" ${s.fontFamily === 'sans' ? 'selected' : ''}>Inter (Modern Sans-Serif)</option>
+                    <option value="mono" ${s.fontFamily === 'mono' ? 'selected' : ''}>JetBrains Mono (Developer / Technical)</option>
+                    <option value="serif" ${s.fontFamily === 'serif' ? 'selected' : ''}>Lora (Editorial / Reading Serif)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">Toolbar Density</label>
+                  <select id="select-density" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none accent-ring">
+                    <option value="comfortable" ${s.density === 'comfortable' ? 'selected' : ''}>Comfortable (Default)</option>
+                    <option value="compact" ${s.density === 'compact' ? 'selected' : ''}>Compact (More Viewport Space)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Toggles -->
+              <div class="divide-y divide-slate-200/70 dark:divide-zinc-800 pt-2">
+                <label class="flex items-center justify-between py-2.5 cursor-pointer">
+                  <div>
+                    <div class="text-xs font-semibold">Show Persistent Bookmarks Bar</div>
+                    <div class="text-[11px] text-slate-500 dark:text-zinc-400">Display HVS and study bookmarks below the address bar</div>
+                  </div>
+                  <input type="checkbox" id="toggle-bookmarks-bar" ${s.showBookmarksBar ? 'checked' : ''} class="w-4 h-4 accent-orange-500 rounded" />
+                </label>
+
+                <label class="flex items-center justify-between py-2.5 cursor-pointer">
+                  <div>
+                    <div class="text-xs font-semibold">Show Muir Student Focus Widgets on Home Page</div>
+                    <div class="text-[11px] text-slate-500 dark:text-zinc-400">Include the 25-minute Study Timer and Quick Notes scratchpad on New Tabs</div>
+                  </div>
+                  <input type="checkbox" id="toggle-study-widgets" ${s.showStudyWidgets ? 'checked' : ''} class="w-4 h-4 accent-orange-500 rounded" />
+                </label>
+
+                <label class="flex items-center justify-between py-2.5 cursor-pointer">
+                  <div>
+                    <div class="text-xs font-semibold">Show Quick Shortcuts Grid on Home Page</div>
+                    <div class="text-[11px] text-slate-500 dark:text-zinc-400">Display customizable quick-dial tiles on the New Tab page</div>
+                  </div>
+                  <input type="checkbox" id="toggle-shortcuts" ${s.showShortcuts ? 'checked' : ''} class="w-4 h-4 accent-orange-500 rounded" />
+                </label>
+              </div>
+            </section>
+
+            <!-- Section 3: Search & Privacy -->
+            <section class="cb-card p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 accent-text"></i>
+                <h2 class="text-sm font-bold uppercase tracking-wider">DuckDuckGo Search & Privacy Shield</h2>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">DuckDuckGo Search Mode</label>
+                  <select id="select-ddg-mode" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none accent-ring">
+                    <option value="standard" ${s.ddgMode === 'standard' ? 'selected' : ''}>Standard DuckDuckGo (Default)</option>
+                    <option value="strict" ${s.ddgMode === 'strict' ? 'selected' : ''}>DuckDuckGo SafeSearch Strict (Classroom Safe)</option>
+                    <option value="lite" ${s.ddgMode === 'lite' ? 'selected' : ''}>DuckDuckGo HTML Lite (Ultra-Fast)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">ColtShield Tracker Protection</label>
+                  <select id="select-shield-level" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none accent-ring">
+                    <option value="standard" ${s.shieldLevel === 'standard' ? 'selected' : ''}>Standard (Blocks 3rd-party trackers)</option>
+                    <option value="strict" ${s.shieldLevel === 'strict' ? 'selected' : ''}>Strict (Aggressive tracker & script blocking)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Data Management Buttons -->
+              <div class="flex flex-wrap gap-2.5 pt-2">
+                <button id="btn-settings-clear-history" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 hover:bg-rose-500/15 hover:text-rose-500 text-xs font-semibold transition">
+                  Clear Browsing History (${state.history.length})
+                </button>
+                <button id="btn-settings-reset-bookmarks" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 hover:bg-amber-500/15 hover:text-amber-500 text-xs font-semibold transition">
+                  Restore Default Muir Bookmarks
+                </button>
+                <button id="btn-settings-reset-all" class="px-3.5 py-2 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white text-xs font-semibold transition">
+                  Reset All Settings to Default
+                </button>
+              </div>
+            </section>
+
+            <!-- Section 4: Startup & Homepage -->
+            <section class="cb-card p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="home" class="w-4 h-4 accent-text"></i>
+                <h2 class="text-sm font-bold uppercase tracking-wider">Startup & New Tab Behavior</h2>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">When Opening a New Tab</label>
+                  <select id="select-startup" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-medium focus:outline-none accent-ring">
+                    <option value="home" ${s.startupBehavior === 'home' ? 'selected' : ''}>Open ColtBrowser Home Page</option>
+                    <option value="blank" ${s.startupBehavior === 'blank' ? 'selected' : ''}>Open Blank Page (colt://blank)</option>
+                    <option value="custom" ${s.startupBehavior === 'custom' ? 'selected' : ''}>Open Custom Homepage URL</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5">Custom Homepage URL</label>
+                  <input id="input-homepage-url" type="text" value="${escapeHtml(s.homepageUrl)}" placeholder="https://www.hvs.org" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono focus:outline-none accent-ring" />
+                </div>
+              </div>
+            </section>
+
+            <!-- Section 5: About ColtBrowser v1.1.0 BETA -->
+            <section class="cb-card p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="info" class="w-4 h-4 accent-text"></i>
+                  <h2 class="text-sm font-bold uppercase tracking-wider">About ColtBrowser</h2>
+                </div>
+                <span class="text-xs font-mono text-slate-400">Apache License 2.0</span>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
+                <strong>ColtBrowser v1.1.0 BETA</strong> — Built for <strong>Muir Middle School (HVS)</strong>. Powered by DuckDuckGo Instant Answers and designed for fast, private student research.
+              </p>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/70 dark:border-zinc-800 text-[11px] text-slate-500 dark:text-zinc-400 space-y-1">
+                <div class="font-semibold text-slate-700 dark:text-zinc-200">What's New in v1.1.0 BETA:</div>
+                <ul class="list-disc list-inside space-y-0.5">
+                  <li>Added full Settings & Customization suite (<code>colt://settings</code>) with 5 themes & 6 accent colors</li>
+                  <li>Added Muir Colts Navy & Gold theme + HVS student bookmarks</li>
+                  <li>Added Split-View Student Scratchpad & 25-minute Study Focus Timer</li>
+                  <li>Added Tab Overview modal, middle-click tab closing, and customizable shortcuts</li>
+                </ul>
+              </div>
+            </section>
+          </div>
+        `;
+
+        // Bind Settings Controls
+        document.getElementById('btn-settings-done').addEventListener('click', () => navigateActive('colt://newtab'));
+
+        viewport.querySelectorAll('[data-set-theme]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.settings.theme = btn.getAttribute('data-set-theme');
+            saveKey('settings', state.settings);
+            applySettings();
+            renderSettingsPage(viewport);
+            lucide.createIcons();
+            showToast(`Theme updated`);
+          });
+        });
+
+        viewport.querySelectorAll('[data-set-accent]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.settings.accent = btn.getAttribute('data-set-accent');
+            saveKey('settings', state.settings);
+            applySettings();
+            renderSettingsPage(viewport);
+            lucide.createIcons();
+            showToast(`Accent color updated`);
+          });
+        });
+
+        document.getElementById('select-font').addEventListener('change', (e) => {
+          state.settings.fontFamily = e.target.value;
+          saveKey('settings', state.settings);
+          applySettings();
+          showToast('Font updated');
+        });
+
+        document.getElementById('select-density').addEventListener('change', (e) => {
+          state.settings.density = e.target.value;
+          saveKey('settings', state.settings);
+          applySettings();
+          showToast('Density updated');
+        });
+
+        document.getElementById('toggle-bookmarks-bar').addEventListener('change', (e) => {
+          state.settings.showBookmarksBar = e.target.checked;
+          saveKey('settings', state.settings);
+          applySettings();
+        });
+
+        document.getElementById('toggle-study-widgets').addEventListener('change', (e) => {
+          state.settings.showStudyWidgets = e.target.checked;
+          saveKey('settings', state.settings);
+        });
+
+        document.getElementById('toggle-shortcuts').addEventListener('change', (e) => {
+          state.settings.showShortcuts = e.target.checked;
+          saveKey('settings', state.settings);
+        });
+
+        document.getElementById('select-ddg-mode').addEventListener('change', (e) => {
+          state.settings.ddgMode = e.target.value;
+          saveKey('settings', state.settings);
+          showToast('DuckDuckGo search mode updated');
+        });
+
+        document.getElementById('select-shield-level').addEventListener('change', (e) => {
+          state.settings.shieldLevel = e.target.value;
+          saveKey('settings', state.settings);
+          showToast('ColtShield protection updated');
+        });
+
+        document.getElementById('select-startup').addEventListener('change', (e) => {
+          state.settings.startupBehavior = e.target.value;
+          saveKey('settings', state.settings);
+        });
+
+        document.getElementById('input-homepage-url').addEventListener('change', (e) => {
+          state.settings.homepageUrl = e.target.value.trim() || 'colt://newtab';
+          saveKey('settings', state.settings);
+          showToast('Homepage URL saved');
+        });
+
+        document.getElementById('btn-settings-clear-history').addEventListener('click', () => {
+          state.history = [];
+          saveKey('history', state.history);
+          renderSettingsPage(viewport);
+          lucide.createIcons();
+          showToast('Browsing history cleared');
+        });
+
+        document.getElementById('btn-settings-reset-bookmarks').addEventListener('click', () => {
+          state.bookmarks = [...DEFAULT_BOOKMARKS];
+          saveKey('bookmarks', state.bookmarks);
+          renderBookmarksBar();
+          showToast('Default Muir & HVS bookmarks restored');
+        });
+
+        document.getElementById('btn-settings-reset-all').addEventListener('click', () => {
+          state.settings = { ...DEFAULT_SETTINGS };
+          state.bookmarks = [...DEFAULT_BOOKMARKS];
+          state.shortcuts = [...DEFAULT_SHORTCUTS];
+          saveKey('settings', state.settings);
+          saveKey('bookmarks', state.bookmarks);
+          saveKey('shortcuts', state.shortcuts);
+          applySettings();
+          renderBookmarksBar();
+          renderSettingsPage(viewport);
+          lucide.createIcons();
+          showToast('All settings reset to v1.1.0 defaults');
+        });
+      }
+
+      // 3. DuckDuckGo Search Results Renderer
+      async function renderDuckDuckGoSearch(viewport, query) {
+        const mode = state.settings.ddgMode;
+        let ddgExternalUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+        if (mode === 'strict') ddgExternalUrl += '&kp=1';
+        if (mode === 'lite') ddgExternalUrl = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`;
+
+        viewport.innerHTML = `
+          <div class="max-w-4xl mx-auto px-4 sm:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-200 dark:border-zinc-800">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🦆</span>
+                <div>
+                  <h2 class="text-base font-bold">DuckDuckGo Results for "${escapeHtml(query)}"</h2>
+                  <p class="text-xs text-slate-500 dark:text-zinc-400">
+                    Mode: <span class="font-semibold uppercase">${mode}</span> • Zero search tracking
+                  </p>
+                </div>
+              </div>
+              <a href="${ddgExternalUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl accent-bg text-white text-xs font-semibold transition self-start sm:self-auto">
+                <span>Open Full DuckDuckGo Page</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+
+            <div id="ddg-results-body" class="space-y-4">
+              <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-zinc-400 py-8">
+                <div class="w-5 h-5 border-2 border-current accent-text border-t-transparent rounded-full animate-spin"></div>
+                <span>Querying DuckDuckGo Instant Answer API...</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const resultsBody = document.getElementById('ddg-results-body');
+
+        try {
+          const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+
+          let html = '';
+
+          if (data.AbstractText) {
+            html += `
+              <div class="p-5 rounded-2xl accent-soft-bg border accent-border">
+                <div class="flex items-center gap-2 text-xs font-bold accent-text uppercase tracking-wider mb-1.5">
+                  <span>DuckDuckGo Instant Answer</span>
+                  ${data.AbstractSource ? `<span>• ${escapeHtml(data.AbstractSource)}</span>` : ''}
+                </div>
+                <h3 class="text-lg font-bold mb-2">${escapeHtml(data.Heading || query)}</h3>
+                <p class="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed mb-3">${escapeHtml(data.AbstractText)}</p>
+                ${data.AbstractURL ? `
+                  <button data-visit="${escapeHtml(data.AbstractURL)}" class="ddg-visit-btn text-xs font-semibold accent-text hover:underline inline-flex items-center gap-1">
+                    <span>Open ${escapeHtml(data.AbstractSource || 'Source')} in ColtBrowser →</span>
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          }
+
+          if (data.Answer) {
+            html += `
+              <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-mono text-sm">
+                ${escapeHtml(data.Answer)}
+              </div>
+            `;
+          }
+
+          const topics = [];
+          if (Array.isArray(data.RelatedTopics)) {
+            data.RelatedTopics.forEach(item => {
+              if (item.Text && item.FirstURL) topics.push(item);
+              else if (Array.isArray(item.Topics)) {
+                item.Topics.forEach(sub => {
+                  if (sub.Text && sub.FirstURL) topics.push(sub);
+                });
+              }
+            });
+          }
+
+          if (topics.length > 0) {
+            html += `<div class="space-y-3 pt-1">`;
+            topics.slice(0, 10).forEach(topic => {
+              const parts = topic.Text.split(' - ');
+              const title = parts[0] || topic.Text;
+              const snippet = parts.slice(1).join(' - ') || topic.Text;
+              html += `
+                <div class="cb-card p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 transition">
+                  <div class="text-xs text-emerald-600 dark:text-emerald-400 font-mono truncate mb-1">${escapeHtml(topic.FirstURL)}</div>
+                  <button data-visit="${escapeHtml(topic.FirstURL)}" class="ddg-visit-btn text-left text-base font-semibold text-blue-600 dark:text-sky-400 hover:underline mb-1 block">
+                    ${escapeHtml(title)}
+                  </button>
+                  <p class="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">${escapeHtml(snippet)}</p>
+                </div>
+              `;
+            });
+            html += `</div>`;
+          }
+
+          const wikiSearchUrl = `https://en.m.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`;
+          html += `
+            <div class="cb-card p-4 rounded-2xl bg-slate-100 dark:bg-zinc-900/70 border border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold">Research "${escapeHtml(query)}" Further</div>
+                <div class="text-xs text-slate-500 dark:text-zinc-400">Open Wikipedia directly inside ColtBrowser or launch full DuckDuckGo web results.</div>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button data-visit="${wikiSearchUrl}" class="ddg-visit-btn px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-xs font-semibold hover:opacity-80 transition">
+                  Search Wikipedia
+                </button>
+                <a href="${ddgExternalUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg accent-bg text-white text-xs font-semibold transition">
+                  DuckDuckGo ↗
+                </a>
+              </div>
+            </div>
+          `;
+
+          resultsBody.innerHTML = html;
+          resultsBody.querySelectorAll('.ddg-visit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const targetUrl = btn.getAttribute('data-visit');
+              if (targetUrl) navigateActive(targetUrl);
+            });
+          });
+        } catch (err) {
+          resultsBody.innerHTML = `
+            <div class="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-sm">
+              <p class="font-semibold text-rose-500 mb-2">Unable to reach DuckDuckGo Instant Answer API directly.</p>
+              <a href="${ddgExternalUrl}" target="_blank" rel="noopener noreferrer" class="inline-block px-4 py-2 rounded-xl accent-bg text-white text-xs font-semibold">
+                Open Search on DuckDuckGo.com ↗
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      // 4. Web Site Iframe Viewport with Smart Banner & Notes Toggle
+      function renderWebFrame(viewport, url) {
+        viewport.innerHTML = `
+          <div class="h-full w-full flex flex-col">
+            <div class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 text-amber-800 dark:text-amber-300">
+                <i data-lucide="shield-alert" class="w-4 h-4 flex-shrink-0"></i>
+                <span>Viewing <strong class="font-mono">${escapeHtml(url)}</strong> in ColtBrowser Sandbox. Sites with strict <code class="font-mono">X-Frame-Options</code> can be opened externally.</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btn-frame-toggle-notes" class="px-2.5 py-1 rounded-md bg-white/80 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-semibold border border-slate-300/60 dark:border-zinc-700 transition">
+                  Side Notes
+                </button>
+                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-md accent-bg text-white font-semibold transition">
+                  Open External Tab ↗
+                </a>
+              </div>
+            </div>
+
+            <div class="flex-1 relative bg-white">
+              <iframe
+                src="${escapeHtml(url)}"
+                class="w-full h-full border-0"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                referrerpolicy="no-referrer"
+                title="ColtBrowser Web Viewport"
+              ></iframe>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btn-frame-toggle-notes').addEventListener('click', () => {
+          toggleSplitNotes();
+        });
+      }
+
+      // --- Split Notes Panel ---
+      function toggleSplitNotes(force) {
+        state.splitNotesOpen = typeof force === 'boolean' ? force : !state.splitNotesOpen;
+        const panel = document.getElementById('split-notes-panel');
+        panel.classList.toggle('hidden', !state.splitNotesOpen);
+        panel.classList.toggle('flex', state.splitNotesOpen);
+        if (state.splitNotesOpen) {
+          document.getElementById('split-notes-textarea').value = state.notes;
+        }
+      }
+
+      // --- Library Drawer (Bookmarks, History, Notes) ---
+      function toggleDrawer(force) {
+        state.drawerOpen = typeof force === 'boolean' ? force : !state.drawerOpen;
+        const drawer = document.getElementById('library-drawer');
+        const backdrop = document.getElementById('drawer-backdrop');
+        if (state.drawerOpen) {
+          drawer.classList.remove('translate-x-full');
+          backdrop.classList.remove('hidden');
+          document.getElementById('drawer-search-input').value = '';
+          renderDrawer();
+        } else {
+          drawer.classList.add('translate-x-full');
+          backdrop.classList.add('hidden');
+        }
+      }
+
+      function renderDrawer() {
+        const tabBm = document.getElementById('drawer-tab-bookmarks');
+        const tabHist = document.getElementById('drawer-tab-history');
+        const tabNotes = document.getElementById('drawer-tab-notes');
+        const content = document.getElementById('drawer-content');
+        const countLabel = document.getElementById('drawer-count-label');
+        const clearBtn = document.getElementById('btn-clear-history');
+        const searchWrap = document.getElementById('drawer-search-wrap');
+        const filter = (document.getElementById('drawer-search-input').value || '').toLowerCase();
+
+        const activeTabClass = 'py-1.5 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm transition';
+        const inactiveTabClass = 'py-1.5 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition';
+
+        tabBm.className = state.drawerMode === 'bookmarks' ? activeTabClass : inactiveTabClass;
+        tabHist.className = state.drawerMode === 'history' ? activeTabClass : inactiveTabClass;
+        tabNotes.className = state.drawerMode === 'notes' ? activeTabClass : inactiveTabClass;
+
+        if (state.drawerMode === 'bookmarks') {
+          searchWrap.classList.remove('hidden');
+          clearBtn.classList.add('hidden');
+          const filtered = state.bookmarks.filter(b => b.title.toLowerCase().includes(filter) || b.url.toLowerCase().includes(filter));
+          countLabel.textContent = `${filtered.length} bookmarks`;
+
+          if (filtered.length === 0) {
+            content.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No matching bookmarks found.</p>`;
+            return;
+          }
+
+          content.innerHTML = filtered.map((bm, idx) => `
+            <div class="group flex items-center justify-between gap-2 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition">
+              <button data-url="${escapeHtml(bm.url)}" class="drawer-nav-btn flex items-center gap-2.5 overflow-hidden flex-1 text-left">
+                <span class="text-base flex-shrink-0">${bm.icon || '🔖'}</span>
+                <div class="overflow-hidden">
+                  <div class="text-xs font-semibold truncate">${escapeHtml(bm.title)}</div>
+                  <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(bm.url)}</div>
+                </div>
+              </button>
+              <button data-remove-bm="${idx}" title="Remove Bookmark" class="p-1 rounded-md text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `).join('');
+
+          content.querySelectorAll('[data-remove-bm]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const idx = Number(btn.getAttribute('data-remove-bm'));
+              state.bookmarks.splice(idx, 1);
+              saveKey('bookmarks', state.bookmarks);
+              renderBookmarksBar();
+              renderDrawer();
+              renderAll();
+              showToast('Bookmark removed');
+            });
+          });
+        } else if (state.drawerMode === 'history') {
+          searchWrap.classList.remove('hidden');
+          clearBtn.classList.remove('hidden');
+          const filtered = state.history.filter(h => h.title.toLowerCase().includes(filter) || h.url.toLowerCase().includes(filter));
+          countLabel.textContent = `${filtered.length} entries`;
+
+          if (filtered.length === 0) {
+            content.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No history entries found.</p>`;
+            return;
+          }
+
+          content.innerHTML = filtered.map(item => `
+            <button data-url="${escapeHtml(item.url)}" class="drawer-nav-btn w-full flex items-center justify-between gap-2 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition text-left">
+              <div class="overflow-hidden">
+                <div class="text-xs font-medium truncate">${escapeHtml(item.title)}</div>
+                <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(item.url)}</div>
+              </div>
+              <span class="text-[10px] text-slate-400 flex-shrink-0">${escapeHtml(item.timestamp)}</span>
+            </button>
+          `).join('');
+        } else {
+          // Student Scratchpad inside Drawer
+          searchWrap.classList.add('hidden');
+          clearBtn.classList.add('hidden');
+          countLabel.textContent = 'Auto-saved locally';
+          content.innerHTML = `
+            <div class="h-full flex flex-col gap-2">
+              <p class="text-[11px] text-slate-500 dark:text-zinc-400">Your persistent Muir student scratchpad:</p>
+              <textarea id="drawer-notes-area" class="flex-1 w-full p-3 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs leading-relaxed focus:outline-none accent-ring resize-none" placeholder="Write notes here...">${escapeHtml(state.notes)}</textarea>
+            </div>
+          `;
+          document.getElementById('drawer-notes-area').addEventListener('input', (e) => {
+            state.notes = e.target.value;
+            saveKey('notes', state.notes);
+            document.getElementById('split-notes-textarea').value = state.notes;
+          });
+        }
+
+        content.querySelectorAll('.drawer-nav-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            navigateActive(btn.getAttribute('data-url'));
+            toggleDrawer(false);
+          });
+        });
+
+        lucide.createIcons();
+      }
+
+      // --- Modals (Add Bookmark/Shortcut & Tab Overview) ---
+      function openModal(mode) {
+        state.modalMode = mode;
+        const modal = document.getElementById('custom-modal');
+        document.getElementById('modal-title').textContent = mode === 'shortcut' ? 'Add Quick Shortcut' : 'Add Custom Bookmark';
+        document.getElementById('modal-input-title').value = '';
+        document.getElementById('modal-input-url').value = '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('custom-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function openTabOverview() {
+        const modal = document.getElementById('tabs-overview-modal');
+        const grid = document.getElementById('overview-tabs-grid');
+        document.getElementById('overview-tab-count').textContent = state.tabs.length;
+
+        grid.innerHTML = state.tabs.map(t => {
+          const url = t.stack[t.stackIndex] || 'colt://newtab';
+          const isActive = t.id === state.activeTabId;
+          return `
+            <div data-ov-tab="${t.id}" class="flex items-center justify-between gap-2 p-3 rounded-xl border cursor-pointer transition ${
+              isActive ? 'accent-border accent-soft-bg' : 'border-slate-200 dark:border-zinc-800 hover:border-slate-400'
+            }">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <span class="text-lg">${t.favicon}</span>
+                <div class="overflow-hidden">
+                  <div class="text-xs font-bold truncate">${escapeHtml(t.title)}</div>
+                  <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(url)}</div>
+                </div>
+              </div>
+              <button data-ov-close="${t.id}" class="p-1 rounded-lg text-slate-400 hover:text-rose-500">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        grid.querySelectorAll('[data-ov-tab]').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('[data-ov-close]')) return;
+            switchTab(card.getAttribute('data-ov-tab'));
+            closeTabOverview();
+          });
+        });
+
+        grid.querySelectorAll('[data-ov-close]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeTab(btn.getAttribute('data-ov-close'));
+            openTabOverview();
+          });
+        });
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+      }
+
+      function closeTabOverview() {
+        const modal = document.getElementById('tabs-overview-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // --- Toggle Bookmark for Current Page ---
+      function toggleCurrentBookmark() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.stackIndex] || 'colt://newtab';
+        if (currentUrl === 'colt://newtab' || currentUrl === 'colt://blank') {
+          showToast('Cannot bookmark blank start page');
+          return;
+        }
+
+        const idx = state.bookmarks.findIndex(b => b.url === currentUrl);
+        if (idx !== -1) {
+          state.bookmarks.splice(idx, 1);
+          showToast('Removed from Bookmarks');
+        } else {
+          state.bookmarks.push({ title: tab.title, url: currentUrl, icon: tab.favicon });
+          showToast('Bookmarked page');
+        }
+        saveKey('bookmarks', state.bookmarks);
+        renderBookmarksBar();
+        updateToolbarState(tab, currentUrl);
+        if (state.drawerOpen) renderDrawer();
+      }
+
+      // --- Global Event Listeners ---
+      function bindEvents() {
+        document.getElementById('btn-new-tab').addEventListener('click', () => createTab());
+        document.getElementById('btn-tab-overview').addEventListener('click', openTabOverview);
+        document.getElementById('btn-close-overview').addEventListener('click', closeTabOverview);
+
+        document.getElementById('btn-back').addEventListener('click', goBack);
+        document.getElementById('btn-forward').addEventListener('click', goForward);
+        document.getElementById('btn-refresh').addEventListener('click', reloadCurrent);
+        document.getElementById('btn-home').addEventListener('click', () => navigateActive('colt://newtab'));
+        document.getElementById('btn-settings').addEventListener('click', () => navigateActive('colt://settings'));
+        document.getElementById('btn-bookmark-toggle').addEventListener('click', toggleCurrentBookmark);
+
+        const omniboxForm = document.getElementById('omnibox-form');
+        const omniboxInput = document.getElementById('omnibox-input');
+        const omniboxClear = document.getElementById('btn-omnibox-clear');
+
+        omniboxForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          navigateActive(omniboxInput.value);
+          omniboxInput.blur();
+        });
+
+        omniboxInput.addEventListener('input', () => {
+          omniboxClear.classList.toggle('hidden', !omniboxInput.value);
+        });
+
+        omniboxInput.addEventListener('focus', () => omniboxInput.select());
+
+        omniboxClear.addEventListener('click', () => {
+          omniboxInput.value = '';
+          omniboxClear.classList.add('hidden');
+          omniboxInput.focus();
+        });
+
+        document.getElementById('btn-shield').addEventListener('click', () => {
+          showToast(`ColtShield (${state.settings.shieldLevel}): ${state.trackersBlocked} trackers blocked`);
+        });
+
+        // Split Scratchpad
+        document.getElementById('btn-focus-notes').addEventListener('click', () => toggleSplitNotes());
+        document.getElementById('btn-close-split-notes').addEventListener('click', () => toggleSplitNotes(false));
+        document.getElementById('split-notes-textarea').addEventListener('input', (e) => {
+          state.notes = e.target.value;
+          saveKey('notes', state.notes);
+          const homeNotes = document.getElementById('home-notes-input');
+          if (homeNotes) homeNotes.value = state.notes;
+        });
+
+        document.getElementById('btn-copy-notes').addEventListener('click', () => {
+          const area = document.getElementById('split-notes-textarea');
+          area.select();
+          document.execCommand('copy');
+          showToast('Notes copied to clipboard');
+        });
+
+        // Library Drawer
+        document.getElementById('btn-drawer').addEventListener('click', () => toggleDrawer());
+        document.getElementById('btn-close-drawer').addEventListener('click', () => toggleDrawer(false));
+        document.getElementById('drawer-backdrop').addEventListener('click', () => toggleDrawer(false));
+        document.getElementById('drawer-search-input').addEventListener('input', renderDrawer);
+
+        document.getElementById('drawer-tab-bookmarks').addEventListener('click', () => {
+          state.drawerMode = 'bookmarks';
+          renderDrawer();
+        });
+        document.getElementById('drawer-tab-history').addEventListener('click', () => {
+          state.drawerMode = 'history';
+          renderDrawer();
+        });
+        document.getElementById('drawer-tab-notes').addEventListener('click', () => {
+          state.drawerMode = 'notes';
+          renderDrawer();
+        });
+
+        document.getElementById('btn-clear-history').addEventListener('click', () => {
+          state.history = [];
+          saveKey('history', state.history);
+          renderDrawer();
+          showToast('History cleared');
+        });
+
+        // Custom Bookmark / Shortcut Modal
+        document.getElementById('btn-add-bookmark-modal').addEventListener('click', () => openModal('bookmark'));
+        document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+        document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+        document.getElementById('modal-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const title = document.getElementById('modal-input-title').value.trim();
+          let url = document.getElementById('modal-input-url').value.trim();
+          if (!title || !url) return;
+          if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('colt://')) {
+            url = 'https://' + url;
+          }
+
+          if (state.modalMode === 'shortcut') {
+            state.shortcuts.push({ title, url, desc: url.replace(/^https?:\/\//, ''), letter: title.charAt(0).toUpperCase() });
+            saveKey('shortcuts', state.shortcuts);
+            const tab = getActiveTab();
+            if (tab && (tab.stack[tab.stackIndex] || 'colt://newtab') === 'colt://newtab') {
+              renderStartPage(document.getElementById('viewport-container'));
+              lucide.createIcons();
+            }
+            showToast('Quick shortcut added');
+          } else {
+            state.bookmarks.push({ title, url, icon: '🔖' });
+            saveKey('bookmarks', state.bookmarks);
+            renderBookmarksBar();
+            showToast('Bookmark added');
+          }
+          closeModal();
+        });
+      }
+
+      // --- HTML Escaping ---
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // --- Boot Sequence ---
+      function init() {
+        loadAllState();
+        applySettings();
+        bindEvents();
+        renderBookmarksBar();
+        createTab();
+        lucide.createIcons();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
