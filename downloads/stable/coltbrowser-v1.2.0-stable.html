@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColtBrowser v1.2.0 — Live Internet Web Browser | Built for Muir Middle School (HVS)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-base: #06101e;
+      --bg-chrome: #09182d;
+      --bg-toolbar: #0f294a;
+      --bg-card: #122f54;
+      --border-1px: #1e4273;
+      --text-main: #f8fafc;
+      --text-muted: #93c5fd;
+      --accent: #eab308;
+      --accent-hover: #ca8a04;
+      --accent-fg: #06101e;
+    }
+
+    /* Theme: Midnight OLED */
+    html.theme-oled {
+      --bg-base: #000000;
+      --bg-chrome: #09090b;
+      --bg-toolbar: #121215;
+      --bg-card: #18181b;
+      --border-1px: #27272a;
+      --text-main: #fafafa;
+      --text-muted: #a1a1aa;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --accent-fg: #09090b;
+    }
+
+    /* Theme: Cyber Dark */
+    html.theme-cyber {
+      --bg-base: #090d16;
+      --bg-chrome: #0d1320;
+      --bg-toolbar: #111827;
+      --bg-card: #151f32;
+      --border-1px: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #06b6d4;
+      --accent-hover: #0891b2;
+      --accent-fg: #090d16;
+    }
+
+    /* Theme: Clean Daylight */
+    html.theme-daylight {
+      --bg-base: #f1f5f9;
+      --bg-chrome: #e2e8f0;
+      --bg-toolbar: #ffffff;
+      --bg-card: #ffffff;
+      --border-1px: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent: #0f294a;
+      --accent-hover: #1e4273;
+      --accent-fg: #eab308;
+    }
+
+    /* Theme: Slate Frost */
+    html.theme-slate {
+      --bg-base: #0f172a;
+      --bg-chrome: #1e293b;
+      --bg-toolbar: #273549;
+      --bg-card: #1e293b;
+      --border-1px: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --accent-fg: #0f172a;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+    }
+    .cb-chrome {
+      background-color: var(--bg-chrome);
+      border-color: var(--border-1px);
+    }
+    .cb-toolbar {
+      background-color: var(--bg-toolbar);
+      border-color: var(--border-1px);
+    }
+    .cb-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-1px);
+    }
+    .cb-border {
+      border-color: var(--border-1px);
+    }
+    .cb-muted {
+      color: var(--text-muted);
+    }
+    .cb-accent-bg {
+      background-color: var(--accent);
+      color: var(--accent-fg);
+    }
+    .cb-accent-bg:hover {
+      background-color: var(--accent-hover);
+    }
+    .cb-accent-text {
+      color: var(--accent);
+    }
+    .cb-accent-border {
+      border-color: var(--accent);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+
+    @keyframes spinSlow {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-fast {
+      animation: spinSlow 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
+
+  <!-- TOP BROWSER CHROME -->
+  <header class="cb-chrome border-b flex flex-col flex-shrink-0 z-30">
+
+    <!-- Row 1: Tab Strip & Live Network Status -->
+    <div class="flex items-center px-2 pt-1.5 gap-2">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-2 pr-2 py-1 flex-shrink-0">
+        <div class="w-6 h-6 rounded-md cb-accent-bg flex items-center justify-center font-extrabold text-xs shadow">
+          🐎
+        </div>
+        <span class="text-xs font-extrabold tracking-tight">ColtBrowser</span>
+        <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded cb-accent-bg">v1.2.0</span>
+      </div>
+
+      <!-- Multi-Tab Strip -->
+      <div id="tab-strip" class="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- New Tab & Live Connection Badge -->
+      <div class="flex items-center gap-1.5 pb-1 flex-shrink-0">
+        <button id="btn-new-tab" title="New Tab (Ctrl+T)" class="px-2.5 py-1 rounded-md cb-toolbar border cb-border hover:opacity-85 text-xs font-bold">
+          +
+        </button>
+        <div id="net-status-pill" title="Real-Time Internet Connection Status" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold">
+          <span id="net-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="net-label">ONLINE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Navigation Bar, Live Omnibox, Connection Mode & Student Tools -->
+    <div class="cb-toolbar border-t px-2 py-1.5 flex items-center gap-1.5">
+      <!-- Navigation Buttons -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-back" title="Back" disabled class="p-1.5 rounded-lg border cb-border hover:opacity-80 disabled:opacity-30 disabled:pointer-events-none">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-forward" title="Forward" disabled class="p-1.5 rounded-lg border cb-border hover:opacity-80 disabled:opacity-30 disabled:pointer-events-none">
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-reload" title="Reload Live Page" class="p-1.5 rounded-lg border cb-border hover:opacity-80">
+          <i id="icon-reload" data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-home" title="ColtBrowser Home (colt://home)" class="p-1.5 rounded-lg border cb-border hover:opacity-80">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Unified Omnibox -->
+      <form id="omnibox-form" class="flex-1 flex items-center cb-chrome border cb-border focus-within:border-amber-400 rounded-xl px-2.5 py-1">
+        <span id="omnibox-security" class="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 mr-2 flex-shrink-0">
+          <i data-lucide="lock" class="w-3 h-3"></i>
+          <span id="omnibox-proto">HTTPS</span>
+        </span>
+        <input
+          id="omnibox-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Enter any real website URL (e.g. wikipedia.org, desmos.com) or search the live web..."
+          class="w-full bg-transparent text-xs sm:text-sm focus:outline-none"
+        />
+        <button type="button" id="btn-bookmark" title="Bookmark Current Page" class="px-1.5 cb-muted hover:text-amber-400 flex-shrink-0">
+          <i id="icon-bookmark" data-lucide="star" class="w-3.5 h-3.5"></i>
+        </button>
+        <button type="submit" class="ml-1 px-3 py-0.5 rounded-lg cb-accent-bg text-xs font-extrabold flex-shrink-0">
+          Go
+        </button>
+      </form>
+
+      <!-- Connection Mode Switcher + Student Tools -->
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <!-- Connection Mode Selector for Live Web Compatibility -->
+        <select
+          id="mode-switcher"
+          title="Web Connection Mode: Direct HTTPS loads sites natively; Live Reader Mirror bypasses X-Frame-Options blocks"
+          class="hidden sm:block cb-chrome border cb-border rounded-lg px-2 py-1 text-[11px] font-mono font-bold focus:outline-none cursor-pointer"
+        >
+          <option value="direct">Mode: Direct HTTPS</option>
+          <option value="reader">Mode: Live Reader Mirror</option>
+        </select>
+
+        <button id="btn-popout-site" title="Open Current URL in Native Browser Tab" class="p-1.5 rounded-lg border cb-border hover:opacity-80 hidden md:flex items-center gap-1 text-[11px] font-mono">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 cb-accent-text"></i>
+        </button>
+
+        <button id="btn-scratchpad" title="Toggle Study Scratchpad" class="p-1.5 rounded-lg border cb-border hover:opacity-80">
+          <i data-lucide="notebook-pen" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <button id="btn-timer" title="25-Min Study Timer" class="hidden lg:flex items-center gap-1 px-2 py-1 rounded-lg border cb-border hover:opacity-80 text-[11px] font-mono font-bold">
+          <i data-lucide="timer" class="w-3.5 h-3.5 cb-accent-text"></i>
+          <span id="timer-display">25:00</span>
+        </button>
+
+        <button id="btn-library" title="Bookmarks & History" class="p-1.5 rounded-lg border cb-border hover:opacity-80">
+          <i data-lucide="library" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <button id="btn-settings" title="Browser Settings (colt://settings)" class="p-1.5 rounded-lg border cb-border hover:opacity-80">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 3: Live Bookmarks Bar -->
+    <div id="bookmarks-bar" class="cb-chrome border-t px-2.5 py-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px] font-medium">
+      <!-- Populated dynamically -->
+    </div>
+  </header>
+
+  <!-- MAIN BROWSER WORKSPACE -->
+  <main class="flex-1 flex overflow-hidden relative">
+
+    <!-- Primary Web / Internal Viewport -->
+    <div id="viewport" class="flex-1 h-full w-full overflow-y-auto flex flex-col">
+      <!-- Rendered dynamically -->
+    </div>
+
+    <!-- Toggleable Split-View Study Scratchpad -->
+    <aside id="scratchpad-drawer" class="hidden w-80 sm:w-96 cb-chrome border-l h-full flex-col flex-shrink-0 z-20">
+      <div class="cb-toolbar border-b px-3 py-2 flex items-center justify-between text-xs font-bold">
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="notebook-pen" class="w-3.5 h-3.5 cb-accent-text"></i>
+          Muir Study Scratchpad
+        </span>
+        <div class="flex items-center gap-1.5">
+          <button id="btn-export-note" class="px-2 py-0.5 rounded cb-accent-bg text-[11px] font-bold">Export .txt</button>
+          <button id="btn-close-scratchpad" class="px-1.5 py-0.5 rounded border cb-border">&times;</button>
+        </div>
+      </div>
+      <textarea
+        id="scratchpad-text"
+        placeholder="Take live research notes while browsing websites..."
+        class="flex-1 w-full p-3 bg-transparent text-xs leading-relaxed focus:outline-none resize-none select-text"
+      ></textarea>
+      <div class="cb-toolbar border-t px-3 py-1 text-[10px] font-mono cb-muted flex justify-between">
+        <span>Auto-saved locally</span>
+        <span id="scratchpad-words">0 words</span>
+      </div>
+    </aside>
+
+    <!-- Slide-Over Bookmarks & History Library Drawer -->
+    <aside id="library-drawer" class="hidden w-80 sm:w-96 cb-chrome border-l h-full flex-col flex-shrink-0 z-20">
+      <div class="cb-toolbar border-b px-3 py-2 flex items-center justify-between text-xs font-bold">
+        <span>Bookmarks &amp; Browsing History</span>
+        <button id="btn-close-library" class="px-2 py-0.5 rounded border cb-border">&times;</button>
+      </div>
+      <div class="grid grid-cols-2 border-b cb-border text-xs font-bold">
+        <button id="lib-tab-bm" class="py-2 cb-toolbar cb-accent-text border-b-2 cb-accent-border">Bookmarks</button>
+        <button id="lib-tab-hist" class="py-2 cb-muted hover:opacity-85">History</button>
+      </div>
+      <div id="library-list" class="flex-1 overflow-y-auto p-2.5 space-y-1.5 text-xs"></div>
+      <div class="cb-toolbar border-t p-2.5 flex items-center justify-between text-[11px] font-mono">
+        <span id="library-count" class="cb-muted">0 items</span>
+        <button id="btn-clear-history" class="px-2.5 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold">
+          Clear History
+        </button>
+      </div>
+    </aside>
+
+    <!-- Toast Notification -->
+    <div id="cb-toast" class="hidden fixed bottom-4 right-4 px-3.5 py-2 rounded-xl cb-card border cb-accent-border cb-accent-text font-mono text-xs font-bold shadow-xl z-50">
+      Ready
+    </div>
+  </main>
+
+  <script>
+    /**
+     * ColtBrowser v1.2.0 — Real Live Internet Web Browser
+     * Built by Henry Green for Muir Middle School (HVS) as part of ColtApps
+     * Storage Namespace: coltbrowser_
+     */
+    (function () {
+      const PREFIX = 'coltbrowser_';
+
+      // Curated Real Live Websites (Verified iframe-friendly + HVS portals)
+      const DEFAULT_BOOKMARKS = [
+        { title: 'Wikipedia', url: 'https://en.m.wikipedia.org' },
+        { title: 'Desmos Graphing', url: 'https://www.desmos.com/calculator' },
+        { title: 'PhET Science Sims', url: 'https://phet.colorado.edu' },
+        { title: 'W3Schools', url: 'https://www.w3schools.com' },
+        { title: 'Internet Archive', url: 'https://archive.org' },
+        { title: 'OpenStreetMap', url: 'https://www.openstreetmap.org' },
+        { title: 'DuckDuckGo Lite', url: 'https://lite.duckduckgo.com/lite/' },
+        { title: 'HVS Portal', url: 'https://www.hvs.org' }
+      ];
+
+      const state = {
+        tabs: [],
+        activeTabId: null,
+        theme: 'muir', // 'muir' | 'oled' | 'cyber' | 'daylight' | 'slate'
+        loadMode: 'direct', // 'direct' | 'reader'
+        searchEngine: 'ddg', // 'ddg' | 'bing'
+        bookmarks: [],
+        history: [],
+        scratchpad: '',
+        scratchpadOpen: false,
+        libraryOpen: false,
+        libraryTab: 'bookmarks',
+        isOnline: navigator.onLine,
+        timerSeconds: 25 * 60,
+        timerRunning: false
+      };
+
+      // --- Storage Helpers ---
+      function save(key, val) {
+        try {
+          localStorage.setItem(PREFIX + key, JSON.stringify(val));
+        } catch (e) {}
+      }
+
+      function load(key, fallback) {
+        try {
+          const raw = localStorage.getItem(PREFIX + key);
+          return raw !== null ? JSON.parse(raw) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function initStorage() {
+        state.theme = load('theme', 'muir');
+        state.loadMode = load('loadMode', 'direct');
+        state.searchEngine = load('searchEngine', 'ddg');
+        state.bookmarks = load('bookmarks', [...DEFAULT_BOOKMARKS]);
+        state.history = load('history', []);
+        state.scratchpad = load('scratchpad', '');
+      }
+
+      // --- Theme & Network Connectivity Detection ---
+      function applyTheme() {
+        const html = document.documentElement;
+        html.classList.remove('dark', 'theme-oled', 'theme-cyber', 'theme-daylight', 'theme-slate');
+        if (state.theme === 'oled') html.classList.add('dark', 'theme-oled');
+        else if (state.theme === 'cyber') html.classList.add('dark', 'theme-cyber');
+        else if (state.theme === 'daylight') html.classList.add('theme-daylight');
+        else if (state.theme === 'slate') html.classList.add('dark', 'theme-slate');
+        else html.classList.add('dark'); // Default Muir Colts Navy & Gold
+      }
+
+      function updateNetworkBadge() {
+        const pill = document.getElementById('net-status-pill');
+        const dot = document.getElementById('net-dot');
+        const label = document.getElementById('net-label');
+
+        if (state.isOnline) {
+          pill.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[11px] font-mono font-bold';
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+          label.textContent = 'ONLINE';
+        } else {
+          pill.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-mono font-bold';
+          dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+          label.textContent = 'OFFLINE';
+        }
+      }
+
+      // Active internet reachability verification
+      async function verifyRealInternet() {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3500);
+          await fetch('https://en.wikipedia.org/w/api.php?action=query&meta=siteinfo&format=json&origin=*', {
+            mode: 'cors',
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          state.isOnline = true;
+        } catch (e) {
+          state.isOnline = navigator.onLine;
+        }
+        updateNetworkBadge();
+      }
+
+      // --- Toast Notification ---
+      let toastTimer = null;
+      function toast(msg) {
+        const el = document.getElementById('cb-toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+      }
+
+      // --- Tab Management ---
+      function createTab(url = 'colt://home') {
+        const id = 'tab_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
+        const tab = {
+          id,
+          title: 'ColtBrowser Home',
+          loading: false,
+          stack: [],
+          index: -1
+        };
+        state.tabs.push(tab);
+        state.activeTabId = id;
+        navigateTab(id, url, true);
+      }
+
+      function closeTab(id, e) {
+        if (e) e.stopPropagation();
+        const idx = state.tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+        state.tabs.splice(idx, 1);
+        if (state.tabs.length === 0) {
+          createTab('colt://home');
+          return;
+        }
+        if (state.activeTabId === id) {
+          state.activeTabId = state.tabs[Math.min(idx, state.tabs.length - 1)].id;
+        }
+        render();
+      }
+
+      function switchTab(id) {
+        if (state.activeTabId === id) return;
+        state.activeTabId = id;
+        render();
+      }
+
+      function getActiveTab() {
+        return state.tabs.find(t => t.id === state.activeTabId);
+      }
+
+      // --- URL & Search Input Resolver ---
+      function resolveInput(raw) {
+        const text = (raw || '').trim();
+        if (!text || text === 'colt://home' || text === 'colt://newtab') {
+          return { kind: 'home', url: 'colt://home' };
+        }
+        if (text === 'colt://settings') {
+          return { kind: 'settings', url: 'colt://settings' };
+        }
+        if (text.startsWith('colt://search')) {
+          const q = new URLSearchParams(text.split('?')[1] || '').get('q') || '';
+          return { kind: 'search', query: q, url: `colt://search?q=${encodeURIComponent(q)}` };
+        }
+
+        // Check if input is a real website URL or domain
+        const hasProtocol = /^https?:\/\//i.test(text);
+        const isDomain = !/\s/.test(text) && (text.includes('.') || text.startsWith('localhost'));
+        if (hasProtocol || isDomain) {
+          const fullUrl = hasProtocol ? text : 'https://' + text;
+          return { kind: 'web', url: fullUrl };
+        }
+
+        // Otherwise treat as a live web search query
+        return {
+          kind: 'search',
+          query: text,
+          url: `colt://search?q=${encodeURIComponent(text)}`
+        };
+      }
+
+      function navigateActive(raw) {
+        const tab = getActiveTab();
+        if (!tab) return;
+        navigateTab(tab.id, raw, true);
+      }
+
+      function navigateTab(tabId, raw, push) {
+        const tab = state.tabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        const target = resolveInput(raw);
+        if (push) {
+          tab.stack = tab.stack.slice(0, tab.index + 1);
+          tab.stack.push(target.url);
+          tab.index = tab.stack.length - 1;
+        }
+
+        updateTabTitle(tab, target);
+
+        if (target.url !== 'colt://home' && target.url !== 'colt://settings') {
+          state.history.unshift({
+            title: tab.title,
+            url: target.url,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          if (state.history.length > 80) state.history.pop();
+          save('history', state.history);
+        }
+
+        if (tab.id === state.activeTabId) render();
+        else renderTabs();
+      }
+
+      function updateTabTitle(tab, target) {
+        if (target.kind === 'home') tab.title = 'ColtBrowser Home';
+        else if (target.kind === 'settings') tab.title = 'Settings';
+        else if (target.kind === 'search') tab.title = `${target.query} — Search`;
+        else {
+          try {
+            tab.title = new URL(target.url).hostname.replace(/^www\./, '');
+          } catch (e) {
+            tab.title = target.url;
+          }
+        }
+      }
+
+      function goBack() {
+        const tab = getActiveTab();
+        if (!tab || tab.index <= 0) return;
+        tab.index--;
+        updateTabTitle(tab, resolveInput(tab.stack[tab.index]));
+        render();
+      }
+
+      function goForward() {
+        const tab = getActiveTab();
+        if (!tab || tab.index >= tab.stack.length - 1) return;
+        tab.index++;
+        updateTabTitle(tab, resolveInput(tab.stack[tab.index]));
+        render();
+      }
+
+      function reloadTab() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        renderViewport(tab.stack[tab.index] || 'colt://home');
+        toast('Reloaded live page');
+      }
+
+      // --- Render Browser Chrome ---
+      function render() {
+        const tab = getActiveTab();
+        if (!tab) return;
+        const currentUrl = tab.stack[tab.index] || 'colt://home';
+
+        renderTabs();
+        updateOmnibox(tab, currentUrl);
+        renderViewport(currentUrl);
+        if (state.libraryOpen) renderLibrary();
+        lucide.createIcons();
+      }
+
+      function renderTabs() {
+        const strip = document.getElementById('tab-strip');
+        strip.innerHTML = state.tabs.map(t => {
+          const active = t.id === state.activeTabId;
+          const url = t.stack[t.index] || 'colt://home';
+          let faviconHtml = `<span class="text-xs">🐎</span>`;
+          if (url.startsWith('http')) {
+            try {
+              const host = new URL(url).hostname;
+              faviconHtml = `<img src="https://www.google.com/s2/favicons?domain=${host}&sz=32" onerror="this.style.display='none'" class="w-3.5 h-3.5 rounded-sm flex-shrink-0" />`;
+            } catch (e) {}
+          }
+
+          return `
+            <div data-tab-id="${t.id}" class="group flex items-center gap-2 px-2.5 py-1.5 rounded-t-lg border-t border-x text-xs cursor-pointer max-w-[195px] min-w-[115px] transition ${
+              active
+                ? 'cb-toolbar cb-accent-text font-bold'
+                : 'cb-muted hover:opacity-90 border-transparent'
+            }">
+              ${faviconHtml}
+              <span class="truncate flex-1">${esc(t.title)}</span>
+              <button data-close-tab="${t.id}" title="Close Tab" class="opacity-60 group-hover:opacity-100 hover:text-rose-400 font-bold">&times;</button>
+            </div>
+          `;
+        }).join('');
+
+        strip.querySelectorAll('[data-tab-id]').forEach(el => {
+          el.addEventListener('click', () => switchTab(el.getAttribute('data-tab-id')));
+        });
+        strip.querySelectorAll('[data-close-tab]').forEach(btn => {
+          btn.addEventListener('click', (e) => closeTab(btn.getAttribute('data-close-tab'), e));
+        });
+      }
+
+      function updateOmnibox(tab, currentUrl) {
+        document.getElementById('btn-back').disabled = tab.index <= 0;
+        document.getElementById('btn-forward').disabled = tab.index >= tab.stack.length - 1;
+
+        const input = document.getElementById('omnibox-input');
+        const proto = document.getElementById('omnibox-proto');
+        const modeSel = document.getElementById('mode-switcher');
+        modeSel.value = state.loadMode;
+
+        if (currentUrl === 'colt://home') {
+          input.value = '';
+          proto.textContent = 'LIVE WEB';
+        } else if (currentUrl === 'colt://settings') {
+          input.value = 'colt://settings';
+          proto.textContent = 'INTERNAL';
+        } else if (currentUrl.startsWith('colt://search')) {
+          const q = new URLSearchParams(currentUrl.split('?')[1] || '').get('q') || '';
+          input.value = q;
+          proto.textContent = 'SEARCH';
+        } else {
+          input.value = currentUrl;
+          proto.textContent = currentUrl.startsWith('https://') ? 'HTTPS' : 'HTTP';
+        }
+
+        const isBookmarked = state.bookmarks.some(b => b.url === currentUrl);
+        const bmIcon = document.getElementById('icon-bookmark');
+        if (bmIcon) bmIcon.setAttribute('fill', isBookmarked ? 'currentColor' : 'none');
+        document.getElementById('btn-bookmark').classList.toggle('text-amber-400', isBookmarked);
+      }
+
+      function renderBookmarksBar() {
+        const bar = document.getElementById('bookmarks-bar');
+        bar.innerHTML = state.bookmarks.map(bm => `
+          <button data-bm-url="${esc(bm.url)}" class="px-2 py-0.5 rounded-md hover:bg-white/10 whitespace-nowrap transition flex items-center gap-1">
+            <span>${esc(bm.title)}</span>
+          </button>
+        `).join('');
+
+        bar.querySelectorAll('[data-bm-url]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-bm-url')));
+        });
+      }
+
+      // --- VIEWPORT ROUTER ---
+      function renderViewport(url) {
+        const vp = document.getElementById('viewport');
+        if (url === 'colt://home') {
+          renderHomeView(vp);
+        } else if (url === 'colt://settings') {
+          renderSettingsView(vp);
+        } else if (url.startsWith('colt://search')) {
+          const q = new URLSearchParams(url.split('?')[1] || '').get('q') || '';
+          renderLiveSearchView(vp, q);
+        } else {
+          renderLiveWebView(vp, url);
+        }
+      }
+
+      // =========================================================================
+      // 1. HOME VIEW (colt://home) — LIVE INTERNET SEARCH & QUICK SITES
+      // =========================================================================
+      function renderHomeView(vp) {
+        vp.innerHTML = `
+          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col items-center text-center space-y-6">
+            
+            <!-- Institution & Live Internet Pill -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <span class="px-3 py-1 rounded-full cb-accent-bg text-xs font-extrabold shadow">
+                Built for Muir Middle School (HVS)
+              </span>
+              <span class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 font-mono text-xs font-bold">
+                &#9679; Connected to Live Internet
+              </span>
+            </div>
+
+            <!-- Logo & Tagline -->
+            <div class="space-y-1">
+              <h1 class="text-3xl sm:text-4xl font-black tracking-tight">
+                Colt<span class="cb-accent-text">Browser</span> <span class="text-sm font-mono font-normal cb-muted">v1.2.0</span>
+              </h1>
+              <p class="text-xs sm:text-sm cb-muted max-w-xl">
+                Search the live web with DuckDuckGo &amp; Wikipedia or enter any real website URL (<code class="cb-accent-text">wikipedia.org</code>, <code class="cb-accent-text">desmos.com</code>, <code class="cb-accent-text">phet.colorado.edu</code>) to browse right inside your browser.
+              </p>
+            </div>
+
+            <!-- Main Search & URL Bar -->
+            <form id="home-search-form" class="w-full max-w-2xl">
+              <div class="flex items-center cb-card border-2 cb-accent-border rounded-2xl p-1.5 shadow-xl">
+                <i data-lucide="globe" class="w-5 h-5 cb-accent-text ml-2.5 mr-2 flex-shrink-0"></i>
+                <input
+                  id="home-search-input"
+                  type="text"
+                  placeholder="Search the live internet or type a website address (e.g. wikipedia.org)..."
+                  class="w-full bg-transparent text-sm sm:text-base focus:outline-none px-1"
+                  autofocus
+                />
+                <button type="submit" class="px-5 py-2 rounded-xl cb-accent-bg text-xs sm:text-sm font-extrabold flex-shrink-0">
+                  Search Web
+                </button>
+              </div>
+            </form>
+
+            <!-- Live Websites Quick Grid -->
+            <div class="w-full text-left space-y-2.5">
+              <div class="flex items-center justify-between text-[11px] font-mono font-bold uppercase tracking-wider cb-muted">
+                <span>Live Websites (Click to Browse Immediately)</span>
+                <span>Mode: ${state.loadMode === 'direct' ? 'Direct HTTPS' : 'Live Reader Mirror'}</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                ${state.bookmarks.map(bm => {
+                  let domain = '';
+                  try { domain = new URL(bm.url).hostname; } catch (e) {}
+                  return `
+                    <button data-home-visit="${esc(bm.url)}" class="cb-card border rounded-xl p-3 text-left hover:border-amber-400 transition flex items-center gap-2.5 shadow-sm">
+                      <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" onerror="this.style.display='none'" class="w-5 h-5 rounded flex-shrink-0" />
+                      <div class="overflow-hidden">
+                        <div class="text-xs font-bold truncate">${esc(bm.title)}</div>
+                        <div class="text-[10px] font-mono cb-muted truncate">${esc(domain)}</div>
+                      </div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Connection Tip Card -->
+            <div class="w-full cb-card border rounded-xl p-3.5 text-left text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="space-y-0.5">
+                <div class="font-bold cb-accent-text">How ColtBrowser Connects to Any Website:</div>
+                <p class="cb-muted text-[11px] leading-relaxed">
+                  <strong>Direct HTTPS</strong> embeds live websites directly over your connection. If a site blocks iframes (like Google or YouTube), switch to <strong>Live Reader Mirror</strong> in the top bar or click <strong>Open Full Site ↗</strong>.
+                </p>
+              </div>
+              <button id="home-toggle-mode" class="px-3 py-1.5 rounded-lg cb-accent-bg font-mono text-[11px] font-extrabold flex-shrink-0">
+                Switch to ${state.loadMode === 'direct' ? 'Reader Mirror' : 'Direct HTTPS'}
+              </button>
+            </div>
+
+            <!-- Footer -->
+            <footer class="pt-4 border-t cb-border w-full flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono cb-muted">
+              <span>Copyright &copy; 2026 Henry Green &bull; Apache License 2.0</span>
+              <span>Part of ColtApps &bull; Muir Middle School (HVS)</span>
+            </footer>
+
+          </div>
+        `;
+
+        document.getElementById('home-search-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = document.getElementById('home-search-input').value;
+          if (val.trim()) navigateActive(val);
+        });
+
+        vp.querySelectorAll('[data-home-visit]').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-home-visit')));
+        });
+
+        document.getElementById('home-toggle-mode').addEventListener('click', () => {
+          state.loadMode = state.loadMode === 'direct' ? 'reader' : 'direct';
+          save('loadMode', state.loadMode);
+          render();
+          toast(`Switched to ${state.loadMode === 'direct' ? 'Direct HTTPS' : 'Live Reader Mirror'} mode`);
+        });
+      }
+
+      // =========================================================================
+      // 2. REAL LIVE INTERNET SEARCH (DUCKDUCKGO + WIKIPEDIA LIVE APIS)
+      // =========================================================================
+      async function renderLiveSearchView(vp, query) {
+        const ddgWebUrl = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`;
+        const bingWebUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+
+        vp.innerHTML = `
+          <div class="max-w-4xl mx-auto w-full px-4 sm:px-6 py-5 space-y-4">
+            <!-- Search Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b cb-border pb-3">
+              <div>
+                <h2 class="text-base sm:text-lg font-extrabold">Live Web Results for "<span class="cb-accent-text">${esc(query)}</span>"</h2>
+                <p class="text-[11px] font-mono cb-muted">Fetched live over your internet connection via DuckDuckGo &amp; Wikipedia APIs</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+                <button data-visit-live="${ddgWebUrl}" class="live-link px-2.5 py-1.5 rounded-lg cb-card border hover:border-amber-400 font-bold">
+                  DuckDuckGo Web
+                </button>
+                <button data-visit-live="${bingWebUrl}" class="live-link px-2.5 py-1.5 rounded-lg cb-card border hover:border-amber-400 font-bold">
+                  Bing Live
+                </button>
+                <a href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-lg cb-accent-bg font-extrabold">
+                  Full DDG &nearr;
+                </a>
+              </div>
+            </div>
+
+            <!-- Live Results Container -->
+            <div id="live-search-results" class="space-y-3">
+              <div class="flex items-center gap-2 font-mono text-xs cb-muted py-4">
+                <span class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin-fast"></span>
+                <span>Searching live internet for "${esc(query)}"...</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        vp.querySelectorAll('.live-link').forEach(btn => {
+          btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-visit-live')));
+        });
+
+        const resultsEl = document.getElementById('live-search-results');
+
+        try {
+          // Fetch DuckDuckGo Instant Answers AND Wikipedia Live OpenSearch concurrently over the real internet
+          const [ddgRes, wikiRes] = await Promise.allSettled([
+            fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`).then(r => r.json()),
+            fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=6&namespace=0&format=json&origin=*`).then(r => r.json())
+          ]);
+
+          let html = '';
+
+          // 1. DuckDuckGo Instant Knowledge Card
+          if (ddgRes.status === 'fulfilled' && ddgRes.value) {
+            const d = ddgRes.value;
+            if (d.AbstractText) {
+              html += `
+                <div class="cb-card border-l-4 cb-accent-border border rounded-xl p-4 space-y-2 shadow">
+                  <div class="text-[11px] font-mono font-bold cb-accent-text uppercase">
+                    Instant Answer &bull; ${esc(d.AbstractSource || 'DuckDuckGo')}
+                  </div>
+                  <h3 class="text-base font-extrabold">${esc(d.Heading || query)}</h3>
+                  <p class="text-xs sm:text-sm cb-muted leading-relaxed">${esc(d.AbstractText)}</p>
+                  ${d.AbstractURL ? `
+                    <button data-visit-live="${esc(d.AbstractURL)}" class="live-link text-xs font-mono font-bold cb-accent-text hover:underline">
+                      Visit ${esc(d.AbstractURL)} inside ColtBrowser &rarr;
+                    </button>
+                  ` : ''}
+                </div>
+              `;
+            }
+
+            if (d.Answer) {
+              html += `
+                <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 font-mono text-xs text-emerald-400">
+                  ${esc(d.Answer)}
+                </div>
+              `;
+            }
+          }
+
+          // 2. Wikipedia Live Web Articles (Clickable inside ColtBrowser!)
+          if (wikiRes.status === 'fulfilled' && Array.isArray(wikiRes.value) && Array.isArray(wikiRes.value[1])) {
+            const titles = wikiRes.value[1];
+            const descs = wikiRes.value[2] || [];
+            const urls = wikiRes.value[3] || [];
+
+            if (titles.length > 0) {
+              html += `<div class="text-[11px] font-mono font-bold uppercase cb-muted pt-1">Live Wikipedia &amp; Web Articles</div>`;
+              html += titles.map((title, i) => {
+                const targetUrl = urls[i] || `https://en.m.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+                // Use mobile Wikipedia URL so it renders cleanly inside iframes
+                const mobileUrl = targetUrl.replace('https://en.wikipedia.org', 'https://en.m.wikipedia.org');
+                return `
+                  <div class="cb-card border rounded-xl p-3.5 hover:border-amber-400 transition">
+                    <div class="text-[11px] font-mono text-emerald-400 truncate">${esc(mobileUrl)}</div>
+                    <button data-visit-live="${esc(mobileUrl)}" class="live-link text-left text-sm sm:text-base font-bold cb-accent-text hover:underline my-0.5 block">
+                      ${esc(title)} — Wikipedia
+                    </button>
+                    <p class="text-xs cb-muted">${esc(descs[i] || 'Click to open live Wikipedia article in ColtBrowser.')}</p>
+                  </div>
+                `;
+              }).join('');
+            }
+          }
+
+          // 3. DuckDuckGo Related Web Links
+          if (ddgRes.status === 'fulfilled' && ddgRes.value && Array.isArray(ddgRes.value.RelatedTopics)) {
+            const related = [];
+            ddgRes.value.RelatedTopics.forEach(item => {
+              if (item.Text && item.FirstURL) related.push(item);
+              else if (Array.isArray(item.Topics)) {
+                item.Topics.forEach(sub => { if (sub.Text && sub.FirstURL) related.push(sub); });
+              }
+            });
+
+            if (related.length > 0) {
+              html += `<div class="text-[11px] font-mono font-bold uppercase cb-muted pt-1">Related Web Topics</div>`;
+              html += related.slice(0, 6).map(item => {
+                const parts = item.Text.split(' - ');
+                return `
+                  <div class="cb-card border rounded-xl p-3">
+                    <div class="text-[11px] font-mono text-emerald-400 truncate">${esc(item.FirstURL)}</div>
+                    <button data-visit-live="${esc(item.FirstURL)}" class="live-link text-left text-sm font-bold cb-accent-text hover:underline my-0.5 block">
+                      ${esc(parts[0] || item.Text)}
+                    </button>
+                    <p class="text-xs cb-muted">${esc(parts.slice(1).join(' - ') || item.Text)}</p>
+                  </div>
+                `;
+              }).join('');
+            }
+          }
+
+          if (!html) {
+            html = `
+              <div class="cb-card border rounded-xl p-5 space-y-3 text-xs">
+                <p>No instant API summary found for <strong>"${esc(query)}"</strong>. Load the live DuckDuckGo web search directly below:</p>
+                <button data-visit-live="${ddgWebUrl}" class="live-link px-3.5 py-2 rounded-lg cb-accent-bg font-bold">
+                  Load Live DuckDuckGo Web Results &rarr;
+                </button>
+              </div>
+            `;
+          }
+
+          resultsEl.innerHTML = html;
+          resultsEl.querySelectorAll('.live-link').forEach(btn => {
+            btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-visit-live')));
+          });
+        } catch (err) {
+          resultsEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs space-y-2">
+              <div class="font-bold text-rose-400">Could not reach live search APIs (${esc(err.message)}).</div>
+              <p class="cb-muted">Make sure your computer is connected to Wi-Fi / internet, or open DuckDuckGo directly:</p>
+              <a href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded-lg cb-accent-bg font-bold">
+                Open DuckDuckGo.com &nearr;
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      // =========================================================================
+      // 3. REAL LIVE WEBSITE VIEWPORT (DIRECT HTTPS + LIVE READER MIRROR)
+      // =========================================================================
+      function renderLiveWebView(vp, url) {
+        const isReader = state.loadMode === 'reader';
+
+        vp.innerHTML = `
+          <div class="flex-1 w-full h-full flex flex-col overflow-hidden">
+            <!-- Smart Live Connection Helper Bar -->
+            <div class="cb-chrome border-b px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono flex-shrink-0">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold flex-shrink-0">
+                  ${isReader ? 'READER MIRROR' : 'DIRECT LIVE'}
+                </span>
+                <span class="truncate cb-muted">${esc(url)}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <button id="vp-switch-mode" class="px-2.5 py-0.5 rounded cb-card border hover:border-amber-400 font-bold">
+                  ${isReader ? 'Switch to Direct HTTPS' : 'Blocked? Use Live Reader Mirror'}
+                </button>
+                <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-0.5 rounded cb-accent-bg font-extrabold">
+                  Open Full Site &nearr;
+                </a>
+              </div>
+            </div>
+
+            <!-- Live Content Area -->
+            <div id="live-web-stage" class="flex-1 w-full h-full relative overflow-hidden bg-white">
+              ${isReader ? `
+                <div id="reader-container" class="h-full w-full overflow-y-auto bg-slate-950 text-slate-100 p-4 sm:p-8 font-sans">
+                  <div class="max-w-3xl mx-auto flex items-center gap-2 font-mono text-xs text-amber-400">
+                    <span class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin-fast"></span>
+                    <span>Fetching live webpage content over internet via CORS Reader Mirror...</span>
+                  </div>
+                </div>
+              ` : `
+                <iframe
+                  id="live-web-iframe"
+                  src="${esc(url)}"
+                  class="w-full h-full border-0 bg-white"
+                  allow="fullscreen; clipboard-read; clipboard-write; autoplay"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="ColtBrowser Live Web Viewport"
+                ></iframe>
+              `}
+            </div>
+          </div>
+        `;
+
+        document.getElementById('vp-switch-mode').addEventListener('click', () => {
+          state.loadMode = state.loadMode === 'direct' ? 'reader' : 'direct';
+          save('loadMode', state.loadMode);
+          render();
+        });
+
+        if (isReader) {
+          fetchLiveReaderContent(url);
+        }
+      }
+
+      // Live Reader Mirror Fetcher (Bypasses X-Frame-Options by fetching real HTML/Markdown over CORS)
+      async function fetchLiveReaderContent(url) {
+        const container = document.getElementById('reader-container');
+        if (!container) return;
+
+        try {
+          // Primary live reader endpoint (Jina Reader API returns clean readable text + links from any real URL)
+          const cleanTarget = url.replace(/^https?:\/\//i, '');
+          const res = await fetch(`https://r.jina.ai/http://${cleanTarget}`);
+          if (!res.ok) throw new Error('Reader mirror returned HTTP ' + res.status);
+          const text = await res.text();
+
+          // Convert markdown links [label](https://...) into clickable buttons inside ColtBrowser
+          const escaped = esc(text);
+          const linkedHtml = escaped
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, href) => {
+              return `<button data-reader-nav="${href}" class="reader-link text-amber-400 underline hover:text-amber-300 font-semibold">${label}</button>`;
+            })
+            .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-black text-white mt-4 mb-2">$1</h1>')
+            .replace(/^## (.+)$/gm, '<h2 class="text-lg font-extrabold text-amber-400 mt-4 mb-1.5">$1</h2>')
+            .replace(/^### (.+)$/gm, '<h3 class="text-base font-bold text-sky-300 mt-3 mb-1">$1</h3>');
+
+          container.innerHTML = `
+            <div class="max-w-3xl mx-auto space-y-4">
+              <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs font-mono text-emerald-300">
+                <span>Live Reader Mirror Loaded: ${esc(url)}</span>
+                <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="underline font-bold">Original Site &nearr;</a>
+              </div>
+              <div class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-200 select-text">${linkedHtml}</div>
+            </div>
+          `;
+
+          container.querySelectorAll('.reader-link').forEach(btn => {
+            btn.addEventListener('click', () => navigateActive(btn.getAttribute('data-reader-nav')));
+          });
+        } catch (err) {
+          container.innerHTML = `
+            <div class="max-w-xl mx-auto p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs space-y-3">
+              <div class="font-bold text-rose-400 text-sm">Live Reader Mirror could not fetch ${esc(url)}</div>
+              <p class="text-slate-300">This website may require direct login cookies or blocked automated readers. You can open it directly in a native system tab:</p>
+              <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="inline-block px-4 py-2 rounded-xl bg-[#eab308] text-[#06101e] font-extrabold">
+                Open ${esc(url)} in System Tab &nearr;
+              </a>
+            </div>
+          `;
+        }
+      }
+
+      // =========================================================================
+      // 4. SETTINGS VIEW (colt://settings)
+      // =========================================================================
+      function renderSettingsView(vp) {
+        vp.innerHTML = `
+          <div class="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 space-y-5 text-xs">
+            <div class="border-b cb-border pb-3">
+              <h1 class="text-lg font-extrabold cb-accent-text">colt://settings — ColtBrowser v1.2.0</h1>
+              <p class="cb-muted">Built by Henry Green for Muir Middle School (HVS) &bull; Part of ColtApps</p>
+            </div>
+
+            <!-- Theme Selector -->
+            <div class="cb-card border rounded-2xl p-4 space-y-3">
+              <div class="font-bold text-sm">Browser Theme</div>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                ${[
+                  { id: 'muir', label: 'Muir Colts' },
+                  { id: 'oled', label: 'Midnight OLED' },
+                  { id: 'cyber', label: 'Cyber Dark' },
+                  { id: 'daylight', label: 'Clean Daylight' },
+                  { id: 'slate', label: 'Slate Frost' }
+                ].map(t => `
+                  <button data-set-theme="${t.id}" class="p-2.5 rounded-xl border font-bold text-center ${
+                    state.theme === t.id ? 'cb-accent-bg cb-accent-border' : 'cb-chrome cb-border hover:opacity-85'
+                  }">
+                    ${t.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Default Web Connection Mode -->
+            <div class="cb-card border rounded-2xl p-4 space-y-2">
+              <div class="font-bold text-sm">Default Internet Connection Mode</div>
+              <p class="cb-muted">Choose how ColtBrowser loads real websites over your connection:</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                <button data-set-mode="direct" class="p-3 rounded-xl border text-left ${state.loadMode === 'direct' ? 'cb-accent-border bg-amber-500/10' : 'cb-chrome cb-border'}">
+                  <div class="font-bold">Direct HTTPS (Recommended)</div>
+                  <div class="text-[11px] cb-muted mt-0.5">Loads full interactive websites directly inside the browser frame.</div>
+                </button>
+                <button data-set-mode="reader" class="p-3 rounded-xl border text-left ${state.loadMode === 'reader' ? 'cb-accent-border bg-amber-500/10' : 'cb-chrome cb-border'}">
+                  <div class="font-bold">Live Reader Mirror</div>
+                  <div class="text-[11px] cb-muted mt-0.5">Fetches live text &amp; links via CORS proxy for sites that block iframes.</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- License & Reset -->
+            <div class="cb-card border rounded-2xl p-4 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
+              <span>Copyright &copy; 2026 Henry Green &bull; Apache License 2.0</span>
+              <button id="btn-reset-browser" class="px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold">
+                Reset Settings &amp; Bookmarks
+              </button>
+            </div>
+          </div>
+        `;
+
+        vp.querySelectorAll('[data-set-theme]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.theme = btn.getAttribute('data-set-theme');
+            save('theme', state.theme);
+            applyTheme();
+            renderSettingsView(vp);
+          });
+        });
+
+        vp.querySelectorAll('[data-set-mode]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.loadMode = btn.getAttribute('data-set-mode');
+            save('loadMode', state.loadMode);
+            renderSettingsView(vp);
+          });
+        });
+
+        document.getElementById('btn-reset-browser').addEventListener('click', () => {
+          state.bookmarks = [...DEFAULT_BOOKMARKS];
+          state.theme = 'muir';
+          state.loadMode = 'direct';
+          save('bookmarks', state.bookmarks);
+          save('theme', state.theme);
+          save('loadMode', state.loadMode);
+          applyTheme();
+          renderBookmarksBar();
+          renderSettingsView(vp);
+          toast('Restored default settings & bookmarks');
+        });
+      }
+
+      // --- Library Drawer (Bookmarks & History) ---
+      function renderLibrary() {
+        const bmBtn = document.getElementById('lib-tab-bm');
+        const histBtn = document.getElementById('lib-tab-hist');
+        const list = document.getElementById('library-list');
+        const count = document.getElementById('library-count');
+
+        bmBtn.className = state.libraryTab === 'bookmarks'
+          ? 'py-2 cb-toolbar cb-accent-text border-b-2 cb-accent-border'
+          : 'py-2 cb-muted hover:opacity-85';
+        histBtn.className = state.libraryTab === 'history'
+          ? 'py-2 cb-toolbar cb-accent-text border-b-2 cb-accent-border'
+          : 'py-2 cb-muted hover:opacity-85';
+
+        if (state.libraryTab === 'bookmarks') {
+          count.textContent = `${state.bookmarks.length} bookmarks`;
+          list.innerHTML = state.bookmarks.map((bm, i) => `
+            <div class="p-2 rounded-lg cb-card border flex items-center justify-between gap-2">
+              <button data-lib-go="${esc(bm.url)}" class="text-left overflow-hidden flex-1">
+                <div class="font-bold truncate">${esc(bm.title)}</div>
+                <div class="text-[10px] font-mono cb-muted truncate">${esc(bm.url)}</div>
+              </button>
+              <button data-del-bm="${i}" class="px-1.5 text-rose-400 hover:bg-rose-500/20 rounded font-bold">&times;</button>
+            </div>
+          `).join('');
+
+          list.querySelectorAll('[data-del-bm]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.bookmarks.splice(Number(btn.getAttribute('data-del-bm')), 1);
+              save('bookmarks', state.bookmarks);
+              renderBookmarksBar();
+              renderLibrary();
+              render();
+            });
+          });
+        } else {
+          count.textContent = `${state.history.length} visited pages`;
+          list.innerHTML = state.history.map(h => `
+            <button data-lib-go="${esc(h.url)}" class="w-full p-2 rounded-lg cb-card border flex items-center justify-between gap-2 text-left hover:border-amber-400">
+              <div class="overflow-hidden">
+                <div class="font-semibold truncate">${esc(h.title)}</div>
+                <div class="text-[10px] font-mono cb-muted truncate">${esc(h.url)}</div>
+              </div>
+              <span class="text-[10px] font-mono cb-muted flex-shrink-0">${esc(h.time)}</span>
+            </button>
+          `).join('') || `<div class="cb-muted text-center py-6">No history yet.</div>`;
+        }
+
+        list.querySelectorAll('[data-lib-go]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            navigateActive(btn.getAttribute('data-lib-go'));
+            state.libraryOpen = false;
+            document.getElementById('library-drawer').classList.add('hidden');
+            document.getElementById('library-drawer').classList.remove('flex');
+          });
+        });
+      }
+
+      // --- 25-Minute Study Timer ---
+      let timerInterval = null;
+      function toggleStudyTimer() {
+        const display = document.getElementById('timer-display');
+        if (state.timerRunning) {
+          clearInterval(timerInterval);
+          state.timerRunning = false;
+          toast('Study timer paused');
+          return;
+        }
+        state.timerRunning = true;
+        toast('25-minute study timer started');
+        timerInterval = setInterval(() => {
+          if (state.timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            state.timerRunning = false;
+            state.timerSeconds = 25 * 60;
+            toast('Study session complete! Take a 5-min break.');
+          } else {
+            state.timerSeconds--;
+          }
+          const m = String(Math.floor(state.timerSeconds / 60)).padStart(2, '0');
+          const s = String(state.timerSeconds % 60).padStart(2, '0');
+          display.textContent = `${m}:${s}`;
+        }, 1000);
+      }
+
+      // --- Escape Helper ---
+      function esc(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // --- Event Wiring ---
+      function bindEvents() {
+        document.getElementById('btn-new-tab').addEventListener('click', () => createTab('colt://home'));
+        document.getElementById('btn-back').addEventListener('click', goBack);
+        document.getElementById('btn-forward').addEventListener('click', goForward);
+        document.getElementById('btn-reload').addEventListener('click', reloadTab);
+        document.getElementById('btn-home').addEventListener('click', () => navigateActive('colt://home'));
+        document.getElementById('btn-settings').addEventListener('click', () => navigateActive('colt://settings'));
+
+        const omniboxForm = document.getElementById('omnibox-form');
+        const omniboxInput = document.getElementById('omnibox-input');
+        omniboxForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          navigateActive(omniboxInput.value);
+          omniboxInput.blur();
+        });
+        omniboxInput.addEventListener('focus', () => omniboxInput.select());
+
+        document.getElementById('mode-switcher').addEventListener('change', (e) => {
+          state.loadMode = e.target.value;
+          save('loadMode', state.loadMode);
+          render();
+          toast(`Connection mode: ${state.loadMode === 'direct' ? 'Direct HTTPS' : 'Live Reader Mirror'}`);
+        });
+
+        document.getElementById('btn-popout-site').addEventListener('click', () => {
+          const tab = getActiveTab();
+          const url = tab?.stack[tab.index];
+          if (url && url.startsWith('http')) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          } else {
+            toast('Open a website URL first to pop out');
+          }
+        });
+
+        document.getElementById('btn-bookmark').addEventListener('click', () => {
+          const tab = getActiveTab();
+          if (!tab) return;
+          const url = tab.stack[tab.index] || 'colt://home';
+          if (url.startsWith('colt://')) return toast('Internal pages cannot be bookmarked');
+          const idx = state.bookmarks.findIndex(b => b.url === url);
+          if (idx !== -1) {
+            state.bookmarks.splice(idx, 1);
+            toast('Bookmark removed');
+          } else {
+            state.bookmarks.push({ title: tab.title, url });
+            toast('Added to bookmarks');
+          }
+          save('bookmarks', state.bookmarks);
+          renderBookmarksBar();
+          render();
+        });
+
+        // Scratchpad Drawer
+        const spDrawer = document.getElementById('scratchpad-drawer');
+        const spText = document.getElementById('scratchpad-text');
+        spText.value = state.scratchpad;
+        document.getElementById('btn-scratchpad').addEventListener('click', () => {
+          state.scratchpadOpen = !state.scratchpadOpen;
+          spDrawer.classList.toggle('hidden', !state.scratchpadOpen);
+          spDrawer.classList.toggle('flex', state.scratchpadOpen);
+        });
+        document.getElementById('btn-close-scratchpad').addEventListener('click', () => {
+          state.scratchpadOpen = false;
+          spDrawer.classList.add('hidden');
+          spDrawer.classList.remove('flex');
+        });
+        spText.addEventListener('input', () => {
+          state.scratchpad = spText.value;
+          save('scratchpad', state.scratchpad);
+          const words = state.scratchpad.trim() ? state.scratchpad.trim().split(/\s+/).length : 0;
+          document.getElementById('scratchpad-words').textContent = `${words} words`;
+        });
+        document.getElementById('btn-export-note').addEventListener('click', () => {
+          const blob = new Blob([state.scratchpad], { type: 'text/plain' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'ColtBrowser_Notes.txt';
+          a.click();
+        });
+
+        // Library Drawer
+        const libDrawer = document.getElementById('library-drawer');
+        document.getElementById('btn-library').addEventListener('click', () => {
+          state.libraryOpen = !state.libraryOpen;
+          libDrawer.classList.toggle('hidden', !state.libraryOpen);
+          libDrawer.classList.toggle('flex', state.libraryOpen);
+          if (state.libraryOpen) renderLibrary();
+        });
+        document.getElementById('btn-close-library').addEventListener('click', () => {
+          state.libraryOpen = false;
+          libDrawer.classList.add('hidden');
+          libDrawer.classList.remove('flex');
+        });
+        document.getElementById('lib-tab-bm').addEventListener('click', () => {
+          state.libraryTab = 'bookmarks';
+          renderLibrary();
+        });
+        document.getElementById('lib-tab-hist').addEventListener('click', () => {
+          state.libraryTab = 'history';
+          renderLibrary();
+        });
+        document.getElementById('btn-clear-history').addEventListener('click', () => {
+          state.history = [];
+          save('history', state.history);
+          renderLibrary();
+          toast('Browsing history cleared');
+        });
+
+        document.getElementById('btn-timer').addEventListener('click', toggleStudyTimer);
+
+        // Online/Offline Live Listeners
+        window.addEventListener('online', () => {
+          state.isOnline = true;
+          updateNetworkBadge();
+          toast('Connected to live internet');
+        });
+        window.addEventListener('offline', () => {
+          state.isOnline = false;
+          updateNetworkBadge();
+          toast('Internet connection lost');
+        });
+
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
+            e.preventDefault();
+            createTab('colt://home');
+          } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+            e.preventDefault();
+            omniboxInput.focus();
+          }
+        });
+      }
+
+      // --- Boot ColtBrowser v1.2.0 ---
+      initStorage();
+      applyTheme();
+      bindEvents();
+      renderBookmarksBar();
+      updateNetworkBadge();
+      verifyRealInternet();
+      createTab('colt://home');
+    })();
+  </script>
+</body>
+</html>
