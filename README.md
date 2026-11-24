@@ -38,7 +38,7 @@ The full-featured edition with deep personalization and classroom productivity t
 
 ## License & Branding
 
-Copyright © 2026 [Henry Green](https://github.com/404henryyynotfound).
+Copyright © 2026 [Henry Green].
 
 This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
 
